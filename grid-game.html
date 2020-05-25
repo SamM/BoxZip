@@ -26,7 +26,7 @@
 
         let points = 0;
 
-        
+        let steps = 0;
 
         function RandomWorld(justIndex){
             if(justIndex) return Math.floor(Math.random()*worlds.length);
@@ -144,6 +144,7 @@
         function update(){
             resizeCanvas();
             document.getElementById('score').innerText = points;
+            document.getElementById('steps').innerText = steps;
             worlds[this_world].drawTo(scene, position);
         }
 
@@ -167,6 +168,7 @@
             if('0zxcvbnm,./ '.indexOf(key) > -1){
                 if(position.length > 0){
                     position.splice(-1,1);
+                    steps++;
                 }else if(prevWorlds.length > 0){
                     position = prevPositions.shift();
                     position.splice(-1,1);
@@ -175,6 +177,7 @@
                         points++;
                         nextTarget();
                     }
+                    steps++;
                 }
                 handled = true; 
             }
@@ -196,6 +199,7 @@
                         nextTarget();
                     }
                 }
+                steps++;
                 handled = true;
             }
             update();
@@ -213,7 +217,6 @@
     </script>
     <style>
         #scene{
-            background-color: black;
             transform: scale(0.8);
         }
         #side-panel {
@@ -221,16 +224,26 @@
             width: 100%;
             text-align: center;
         }
+        #side-panel * {
+            display: inline-block;
+            padding: 0 5px;
+            margin: 1.25vh 0;
+            font-size: 5vh;
+        }
         html, body{
             padding: 0;
             margin: 0;
             text-align: center;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         }
     </style>
 </head>
 
 <body>
-    <div id="side-panel"><h1 class="score-label">Score: <span id="score">0</span></h1></div>
+    <div id="side-panel">
+        <h1 class="score-label">Score: <span id="score">0</span></h1>
+        <h1 class="steps-label">Steps: <span id="steps">0</span></h1>
+    </div>
     <canvas id="scene" width=100 height=100></div>
 </body>
 
