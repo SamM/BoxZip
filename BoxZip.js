@@ -1,203 +1,330 @@
-function is(variable) {
-	let type = a=>b=>typeof a === typeof b;
-	let it = that => that === variable;
-	it.it = it; it.this = it;
-	it.as = that => variable instanceof that;
-	it.type = that => type(variable)(that);
-	it.of = it.type;
-	it.fn = () => it.type(I => 0);
-	it.str = () => it.type('');
-	it.num = () => it.type(3);
-	it.obj = () => it.type({});
-	it.null = () => it(null);
-	it.array = () => Array.isArray(variable);
-	it.true = that => !!that;
-	it.false = that => !that;
-	it.not = it.false;
-	it.has = that => variable.indexOf(that) > -1;
-	it.in = that => that.indexOf(variable) > -1;
-	return it;
+let BoxZip = {};
+
+BoxZip.AddressToPath = function(address, byteSize){
+    let path = [];
+
+    if(typeof byteSize != 'number' || byteSize < 1) byteSize = 1;
+    byteSize = Math.round(byteSize);
+
+    address.forEach(function(location){
+        if(typeof location != 'number') return;
+        path = path.concat(BoxZip.LocationToPath(location, byteSize));
+    });
+
+    while(byteSize > 1 && path.length % byteSize != 0) path.push(false);
+
+    return path;
+};
+BoxZip.LocationToPath = function(location, byteSize){
+    if(typeof location != 'number') return [];
+    if(location < 0) location = -location;
+    let a, n = location;
+    let path = [];
+
+    if(location === 0) path = [false];
+    
+    if(typeof byteSize != 'number' || byteSize < 1) byteSize = 1;
+    byteSize = Math.round(byteSize);
+
+    while (n > 0)
+    {
+        a = n % 2;
+        path.push(a === 0 ? false : true);
+        n = Math.floor(n / 2);
+    }
+
+    while(byteSize > 1 && path.length % byteSize != 0) path.push(false);
+
+    return path;
+};
+BoxZip.PathsMatch = function(destination, beginnings){
+    for(var i=0; i< destination.length; i++){
+        if(i >= beginnings.length) return true;
+        if(destination[i] != beginnings[i]) return false;
+    }
+    return true;
 }
-
-function Path(i){
-	if(is(i).num()){
-		return Path.fromIndex(i);
-	}
-	if(is(i).str()){
-		return Path.fromString(i);
-	}
-	if(is(i).array()){
-		return i.map(c=>!!c?1:0);
-	}
+BoxZip.minus = function(path, begins, overwrite){
+    while(path.length > 0 && begins.length > 0){
+        if(path[0] == begins.shift()) path.shift();
+        else if(overwrite) continue;
+        else return path;
+    }
+    return path;
 }
-Path.fromIndex = function(index){
-	if(index === 0) return[0];
-	let i = -1,
-		x = 0;
-	while(x <= index){
-		i++;
-		x = Math.pow(2, i);
-	}
-	function Solve(index, i){
-		if(i < 0) return [];
-		let x = Math.pow(2, i);
-		if(x > index) return Solve(index, i-1).concat([0]);
-		if(x === index) return Solve(0, i-1).concat([1]);
-		// Otherwise x less than index
-		return Solve(index - x, i-1).concat([1]);
-	}
-	return Solve(index, i).slice(0,-1);
+BoxZip.clamp = function clamp(v){
+    if(typeof v != 'number') return 0;
+    if(v === 0) return 0;
+    if(v === 1) return 1;
+    v = v % 1;
+    if(v === 0) return 1;
+    if(v < 0) return 1-v;
+    return v;
 };
-Path.fromString = function(str){
-	if (is(str).str() && str.length >= 2) {
-		let unique = '';
-		str.split('').forEach(function (c) {
-			if (!is(c).in(unique)) unique += c;
-		});
-		if (is(unique.length)(2)) {
-			let f = str[0],
-				t = str[1];
-			return str.slice(2).split('').map(c=>c==t?1:0)
-		}
-	}
-	return [];
-};
-Path.toString = function(path, code){
-	if(is(path).num()) path = Path.fromIndex(path);
-	if(is(path).str()) path = Path.fromString(path);
-	if(!is(code).str() || code.length < 2) code = '01';
-	if(code.length > 2) code = code.slice(0,2);
-	return code+path.map(t=>t?code[1]:code[0]).join('');
-};
-Path.toIndex = function(path){
-	if(is(path).num()) return path;
-	if(is(path).str()) path = Path.fromString(path);
-	if(!is(path).array()) throw "Path not Array";
-	let sum = 0, i = 0;
-	path.forEach(c=>{
-		if(c) sum += Math.pow(2, i);
-		i++;
-	});
-	return sum;
-};
-Path.digest = '0123456789EFGHI';
-Path.toHex = function(path){
-	if(is(path).num()) path = Path.fromIndex(path);
-	if(is(path).str()) path = Path.fromString(path);
-	if(is(path).array()){
-		let hexCode = "";
-		while(path.length){
-			sum = 0;
-			count = 0;
-			// A
-			sum += path.shift() ? Math.pow( 2, count++ ) : 0;
-			// B
-			if(path.length==0) path[0] = 0;
-			sum += path.shift() ? Math.pow( 2, count++ ) : 0;
-			// C
-			if(path.length==0) path[0] = 0;
-			sum += path.shift() ? Math.pow( 2, count++ ) : 0;
-			// D
-			if(path.length==0) path[0] = 0;
-			sum += path.shift() ? Math.pow( 2, count++ ) : 0;
-
-			hexCode += Path.digest[sum];
-		}
-		return hexCode;
-	}
-	return '';
+BoxZip.unzip = function(path, into){
+    // path : Array of booleans
+    // into : Integer
+    if(typeof into != 'number' || into < 2 || into > 3) into = 2;
+    else into = Math.round(into);
+    let axii = { x:[], y:[], z:[] };
+    let i = 0;
+    while(path.length > 0){
+        for(i = 0; i < into; i++){
+            if(path.length == 0) break;
+            axii['xyz'[i]].push(path.shift());
+        }
+    }
+    return axii;
 }
+BoxZip.setDepth = function(path, depth){
+    // path : Array
+    // depth : Integer
+    if(typeof depth != 'number' || depth < 0) return path;
+    while(path.length < depth) path.push(false);
+    while(path.length > depth) path.splice(-1,1);
+    return path;
+}
+BoxZip.isPath = function(path){
+    if(!Array.isArray(path)) return false;
+    for(var i=0; i<path.length; i++){
+        if(typeof path[i] != 'boolean') return false;
+    }
+    return true;
+}
+BoxZip.PathToAddress = function(path, locationDepth){
+    if(typeof locationDepth != 'number' || locationDepth < 1) locationDepth = 1;
+    var i = 0;
+    var location = 0;
+    var address = [];
+    var direction;
+    for(var p=0; p<path.length; p++){
+        direction = path[p];
+        if(i!=0 && i % locationDepth == 0)
+        {
+            i = 0;
+            address.push(location);
+            location = 0;
+        }
+        if(direction) location += Math.pow(2, i);
+        i++;
+    }
+    if(i!=0 && i % locationDepth == 0)
+    {
+        address.push(location);
+    }
+    return address;
+}
+BoxZip.roundDepth = function(path, byteSize){
+    // path : Array
+    // depth : Integer
+    if(typeof depth != 'number' || depth < 0) return path;
+    while(byteSize > 1 && path.length % byteSize != 0) path.push(false);
+    return path;
+}
+/*/
+//
+/// BoxZip 1D - Line
+//
+/*/
+BoxZip[1] = function(address, depth){
+    // address : Array
+    // depth : Integer
+    if(!(this instanceof BoxZip[1])) return new BoxZip[1](address, depth);
 
-let BoxZip = function (initial_state) {
-	let States = {};
-	let State = 0;
-	let LastSet;
-	if (arguments.length == 1) States[''] = initial_state;
-	function Box(path, state, forceFill) {
-		if (is(path).array()) {
-			if (!!forceFill) {
-				path.forEach(p => Box(p, state));
-			} else if (is(state).array()) {
-				if (is(state.length)(path.length)) {
-					let i = 0;
-					path.forEach(function (p) {
-						Box(p, state[i]);
-						i++;
-					})
-				} else return Box;
-			} else {
-				path.forEach(p => Box(p, state));
-			}
-			return Box;
-		} else if (is(path).str() && path.length >= 2) {
-			path = Path.toIndex(path);
-		}
-		if (is(path).num() && !is(state)()) {
-			States[path] = state;
-		}
-		return Box;
-	}
-	
-	Box.Path = Path;
+    let private = {
+        address : [],
+        depth : 0
+    };
 
-	Box.length = ()=>States.length;
-	Box.keys = ()=>Object.keys(States);
+    let self = this;
 
-	Box.draw = function (draw_function/*/(color, x, y, w, h)/*/, reverse_z) {
-		function DrawBox(s){
-			// Convert Number Into Path
-			let path;
-			if(s == '') path = [];
-			else path = Box.Path(parseInt(s));
-			// Convert Path into start and end coordinates for x and y
-			let o = { i: s, x : 0, y : 0, h : 1, w : 1};
-			let c = 0, v=1, f, h=0;
-			if(path.length){
-				for(var i=0; i<path.length; i++){
-					f = ((i+1)%2==0)? ((i+1)/2)-1: i/2;
-					c = 1 / Math.pow(2, f);
-					if(path[i]){
-						if(v){
-							o.y += c / 2;
-							o.h -= c / 2;
-						} 
-						else{
-							o.x += c / 2;
-							o.w -= c / 2;
-						}
-					}else{
-						if(v) o.h = o.h/2;
-						else o.w = o.w/2;
-					}
-					v=!v;
-					h=!h;
-				}
-			}
-			return o;
-		}
-		if (is(draw_function).fn()) {
-			//console.log('Number of squares being drawn: '+Box.length)
-			let Panels = Object.keys(States).sort(function(a,b){
-				a = a===''?-1:parseInt(a);
-				b = b===''?-1:parseInt(b);
-				if(a===b) return 0;
-				if(a<b) return -1;
-				else return 1;
-			});
-			let coords = Panels.map(i => DrawBox(i));
-			coords.sort((a,b)=>{
-				let ac = a.w + a.h ;
-				let bc = b.w + b.h ;
-				if(ac===bc) return 0;
-				if(ac<bc) return reverse_z ? -1 : 1;
-				else return reverse_z ? 1 : -1;
-			});
-			coords.forEach(o => {
-				if(typeof o !== 'object') return;
-				if(typeof o.i != 'undefined' && typeof States[o.i] != 'undefined') draw_function(States[o.i], o)
-				//console.log(o.i,States[o.i]);
-			});
-		}
-	};
-	return Box;
+    this.setAddress = function(address){
+        if(typeof address == 'number') address = [address];
+        if(BoxZip.isPath(address)) address = BoxZip.PathToAddress(address);
+        function convertBoolToInt(b){ return typeof b == 'boolean' ? (b ? 1 : 0) : b; }
+        if(Array.isArray(address)) address = address.map(convertBoolToInt).filter(a=>typeof a == 'number');
+        else return self;
+
+        private.address = address;
+        
+        return self;
+    };
+    this.getAddress = function(){
+        return private.address;
+    }
+    this.setDepth = function(depth){
+        if(typeof depth == 'number'){
+            if(depth > 0){
+                private.depth = Math.round(depth);
+            }
+        }
+        return self;
+    }
+    this.getDepth = function(){
+        return private.depth;
+    }
+
+    this.setAddress(address);
+    this.setDepth(depth == undefined ? this.getAddress().length : depth);
+
 };
+
+BoxZip[1].prototype.toPath = function(){
+    return BoxZip.setDepth(BoxZip.AddressToPath(this.getAddress()), this.getDepth());
+}
+BoxZip[1].prototype.toArea = function(scale, offset){
+    let a = 0, b = 1, c = 1;
+    let path = this.toPath();
+    path.forEach(function(BIT){
+        if(BIT)  a += c / 2;
+        else  b -= c / 2;
+        c = c /2;
+    });
+    if(typeof scale == 'number'){
+        a *= scale;
+        b *= scale;
+    }
+    if(typeof offset == 'number'){
+        a += offset;
+        b += offset;
+    }
+    return [a, b];
+};
+/*/
+//
+/// BoxZip 2D - Squares
+//
+/*/
+BoxZip[2] = function(address){
+    // address : Array
+    // depth : Integer
+    if(!(this instanceof BoxZip[2])) return new BoxZip[2](address);
+
+    let private = {
+        address : []
+    };
+
+    let self = this;
+
+    this.setAddress = function(address){
+        if(typeof address == 'number') address = [address];
+        if(BoxZip.isPath(address)) address = BoxZip.PathToAddress(address,2);
+        function convertBoolToInt(b){ return typeof b == 'boolean' ? (b ? 1 : 0) : b; }
+        if(Array.isArray(address)) address = address.map(convertBoolToInt).filter(a=>typeof a == 'number');
+        else return self;
+
+        private.address = address;
+        
+        return self;
+    };
+    this.getAddress = function(){
+        return private.address;
+    }
+
+    this.setAddress(address);
+
+};
+BoxZip[2].prototype.toPath = function(){
+    let path = BoxZip.AddressToPath(this.getAddress(), 2);
+    return path;
+}
+BoxZip[2].prototype.toArea = function(){
+    let location = BoxZip.unzip(this.toPath(), 2);
+    return [BoxZip[1](location.x).toArea(), BoxZip[1](location.y).toArea()];
+};
+/*/
+//
+/// BoxZip 3D - Cubes
+//
+/*/
+BoxZip[3] = function(address){
+    // address : Array
+    // depth : Integer
+    if(!(this instanceof BoxZip[3])) return new BoxZip[3](address);
+
+    let private = {
+        address : []
+    };
+
+    let self = this;
+
+    this.setAddress = function(address){
+        if(typeof address == 'number') address = [address];
+        if(BoxZip.isPath(address)) address = BoxZip.PathToAddress(address,3);
+        function convertBoolToInt(b){ return typeof b == 'boolean' ? (b ? 1 : 0) : b; }
+        if(Array.isArray(address)) address = address.map(convertBoolToInt).filter(a=>typeof a == 'number');
+        else return self;
+
+        private.address = address;
+        
+        return self;
+    };
+    this.getAddress = function(){
+        return private.address;
+    }
+
+    this.setAddress(address);
+
+};
+BoxZip[3].prototype.toPath = function(){
+    return BoxZip.AddressToPath(this.getAddress(), 3);
+}
+BoxZip[3].prototype.toArea = function(scale, offset){
+    let location = BoxZip.unzip(this.toPath(), 3);
+    return [BoxZip[1](location.x).toArea(), BoxZip[1](location.y).toArea(), BoxZip[1](location.z).toArea()];
+};
+/*/
+/// Vector
+/*/
+BoxZip.Vector = function(x, y, z){
+    if(!(this instanceof BoxZip[3].Vector)) return new BoxZip[3].Vector(x,y,z);
+    
+    let self = this;
+    let private = {};
+
+    let setter = key => value => { private[key] = BoxZip.clamp(value); };
+    let getter = key => () => private[key];
+
+    for(var i=0,k; i<3; i++){
+        k = 'xyz'[i];
+        Object.defineProperty(this, k, { get: getter(k), set: setter(k) });
+        setter(k)(arguments[i]);
+    }
+}
+BoxZip.Vector.prototype.toString = function(){
+    return "BoxZip[3].Vector("+[this.x, this.y, this.z].join(',')+")";
+}
+/*/
+/// Color
+/*/
+BoxZip.Color = function(r,g,b,a){
+    if(!(this instanceof BoxZip.Color)) return new BoxZip.Color(r,g,b,a);
+    
+    let self = this;
+    let private = {};
+
+    let setter = key => value => { private[key] = BoxZip.clamp(value); };
+    let getter = key => () => private[key];
+
+    for(var i=0,k; i<4; i++){
+        k = 'rgba'[i];
+        Object.defineProperty(self, k, { get: getter(k), set: setter(k) });
+        setter(k)(arguments[i]);
+    }
+
+};
+BoxZip.Color.prototype.blend = function(color){
+    if(color instanceof BoxZip.Color){
+        let r = (this.r + color.r) / 2;
+        let g = (this.g + color.g) / 2;
+        let b = (this.b + color.b) / 2;
+        let a = (this.a + color.a) / 2;
+        return new BoxZip.Color(r,g,b,a);
+    }
+    return this;
+}
+BoxZip.Color.prototype.toString = function(){
+    let to256 = d=>Math.floor(d * 255);
+    let to2dp = d=>Math.round(d * 100) / 100;
+    return "rgba("+[to256(this.r), to256(this.g), to256(this.b), to2dp(this.a)].join(',')+")";
+}

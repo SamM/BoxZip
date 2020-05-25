@@ -1,0 +1,177 @@
+<html>
+
+<head>
+    <title>2D Grid Navigating Game</title>
+    <script src="BoxZip.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        const NUM_GATES = 30;
+        const NUM_WORLDS = 10;
+        const MIN_LOCATION = 32;
+        const MAX_LOCATION = 1024;
+        let scene;
+
+        let size;
+
+        let position = [];
+
+        let prevPositions = [];
+        let prevWorlds = [];
+
+        let this_world = 0;
+
+        let worlds = [];
+
+        for(var i=0; i<NUM_WORLDS; i++){
+            worlds.push(new World(i));
+        }
+
+        function RandomWorld(){
+            return worlds[Math.floor(Math.random()*worlds.length)];
+        }
+
+        function RandomColor(alpha){
+            if(alpha === undefined) alpha = 1;
+            return BoxZip.Color(Math.random(),Math.random(),Math.random(),alpha);
+        }
+
+        function World(i, color){
+            this.id = i;
+            this.color = color ? color : RandomColor();
+            this.contents = [];
+            this.add =  function(gate) { this.contents.push(gate); };
+            this.drawTo = function(canvas, position) {
+                this.contents.forEach((gate)=>gate.drawTo.call(gate, canvas, position));
+            };
+        }
+        
+
+        function Gate(place, world){
+            this.location = place;
+            this.world = world;
+        }
+        Gate.prototype.drawTo = function(canvas, position){
+            let area = BoxZip[2](this.location);
+            let zoom_path = BoxZip[2](position).toPath();
+            let area_path = area.toPath();
+            if(!BoxZip.PathsMatch(area_path, zoom_path)) return;
+            
+            area_path = BoxZip.minus(area_path, zoom_path);
+            area = BoxZip[2](area_path).toArea();
+
+            let s = size;
+
+            let x = area[0][0];
+            let w = area[0][1] - x;
+            let y = area[1][0];
+            let h = area[1][1] - y;
+
+            let ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = this.world.color.toString();
+            ctx.fillRect(x*s,y*s,w*s,h*s);
+        }
+
+        function PopulateWorlds(steps){
+            if(typeof steps != 'number') return;
+            if(steps <= 0) return;
+
+            let gate = new Gate(MIN_LOCATION+Math.floor(Math.random()*(MAX_LOCATION-MIN_LOCATION)), RandomWorld());
+
+            let world = RandomWorld();
+            world.add(gate);
+
+            PopulateWorlds(steps-1);
+        }
+
+        function resizeCanvas(){
+            size = Math.min(window.innerHeight, window.innerWidth);
+            scene.width = size;
+            scene.height = size;
+            let ctx = scene.getContext('2d');
+            ctx.fillStyle = worlds[this_world].color.toString();
+            ctx.fillRect(0,0,size,size);
+        }
+
+        function start(){
+            scene = document.getElementById('scene');
+            resizeCanvas();
+            PopulateWorlds(NUM_GATES);
+            worlds[this_world].drawTo(scene, position);
+        }
+
+        function update(){
+            resizeCanvas();
+            worlds[this_world].drawTo(scene, position);
+        }
+
+        function controller(event){
+            if(event.defaultPrevented) return;
+            var handled = false;
+            var direction = -1;
+            var key;
+            if(event.key !== undefined){
+                key = event.key;
+            }else if(event.keyCode !== undefined){
+                key = event.keyCode
+            }
+            key = parseInt(key+"");
+            if(key === 7) direction = 0;
+            if(key === 9) direction = 1;
+            if(key === 1) direction = 2;
+            if(key === 3) direction = 3;
+
+            if(key === 5){
+                if(position.length > 0){
+                    position.splice(-1,1);
+                }else if(prevWorlds.length > 0){
+                    position = prevPositions.shift();
+                    position.splice(-1,1);
+                    this_world = prevWorlds.shift();
+                }
+                handled = true; 
+            }
+
+            if(direction !== -1 && !handled) {
+                position.push(direction);
+                let pos_path = BoxZip[2](position).toPath();
+                let matches = worlds[this_world].contents.filter(function(gate){
+                    let gate_path = BoxZip[2](gate.location).toPath();
+                    return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
+                });
+                if(matches.length > 0){
+                    prevPositions.unshift(position);
+                    prevWorlds.unshift(this_world);
+                    this_world = matches[0].world.id;
+                    position = [];
+                }
+                handled = true;
+            }
+            update();
+
+            if(handled){
+                event.preventDefault();
+            }
+        }
+
+        window.addEventListener('load', start);
+        window.addEventListener('resize', update);
+        window.addEventListener('keypress', controller);
+        
+
+    </script>
+    <style>
+        #scene{
+            background-color: black;
+        }
+        html, body{
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="scene" width=100 height=100></div>
+</body>
+
+</html>
