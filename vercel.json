@@ -3,7 +3,7 @@
     "version": 1,
     "alias": ["morpheous.com"],
     "builds": [
-        { "src": "*.[js|html]", "use": "@now/static" }
+        { "src": "*.*", "use": "@now/static" }
     ],
     "routes": [
         { "src": "/game", "dest": "/grid-game.html"},
