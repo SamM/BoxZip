@@ -219,12 +219,12 @@
         #scene{
             transform: scale(0.8);
         }
-        #side-panel {
+        .side-panel {
             position: absolute;
             width: 100%;
             text-align: center;
         }
-        #side-panel * {
+        .side-panel * {
             display: inline-block;
             padding: 0 5px;
             margin: 1.25vh 0;
@@ -235,16 +235,32 @@
             margin: 0;
             text-align: center;
             font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            position: relative;
+        }
+        .bottom{
+            bottom: 0;
+        }
+        .logo, .black, .label{
+            color: black;
+        }
+        .logo span, .white, .label span{
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <div id="side-panel">
-        <h1 class="score-label">Score: <span id="score">0</span></h1>
-        <h1 class="steps-label">Steps: <span id="steps">0</span></h1>
+    <div class="side-panel">
+        <h1 class="logo">Square<span>Gate</span></h1>
     </div>
-    <canvas id="scene" width=100 height=100></div>
+    
+    <canvas id="scene" width=100 height=100></canvas>
+    
+    <div class="side-panel bottom">
+        <h1 class="score label">Score: <span id="score">0</span></h1>
+        <h1 class="steps label">Steps: <span id="steps">0</span></h1>
+    </div>
+
 </body>
 
 </html>
