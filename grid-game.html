@@ -28,6 +28,9 @@
 
         let steps = 0;
 
+        let inputSets = ['45120 ', 'qwaszx ', 'erdfcv ', 'tyghbn ', 'uijkm, ', 'opl;./ '];
+        let lastInput = 0;
+
         function RandomWorld(justIndex){
             if(justIndex) return Math.floor(Math.random()*worlds.length);
             return worlds[Math.floor(Math.random()*worlds.length)];
@@ -75,11 +78,18 @@
             ctx.fillRect(x*s,y*s,w*s,h*s);
         }
 
+        function RandomLocation(world){
+            function randomize(){
+                return MIN_LOCATION+Math.floor(Math.random()*(MAX_LOCATION-MIN_LOCATION));
+            }
+            return randomize();
+        }
+
         function PopulateWorlds(steps){
             if(typeof steps != 'number') return;
             if(steps <= 0) return;
 
-            let gate = new Gate(MIN_LOCATION+Math.floor(Math.random()*(MAX_LOCATION-MIN_LOCATION)), RandomWorld());
+            let gate = new Gate(RandomLocation(), RandomWorld());
 
             let world = RandomWorld();
             world.add(gate);
@@ -120,6 +130,13 @@
             while(target_world == this_world) target_world = RandomWorld(true);
         }
 
+        function BuildInitialPath(){
+            for(var i = 0, next; i < worlds.length; i++){
+                next = (i + 1) % worlds.length;
+                worlds[i].add(new Gate(RandomLocation(worlds[i]), worlds[next]));
+            }
+        }
+
         function start(){
             scene = document.getElementById('scene');
             let query = getQuery();
@@ -137,15 +154,38 @@
             nextTarget();
             
             resizeCanvas();
+            createKeyHints();
+            BuildInitialPath();
             PopulateWorlds(NUM_GATES);
             worlds[this_world].drawTo(scene, position);
         }
 
+        let keyHints = {};
+
+        function createKeyHints(){
+            
+        }
+
+        function updateKeyHints(){
+            
+        }
+
         function update(){
             resizeCanvas();
+            updateKeyHints()
             document.getElementById('score').innerText = points;
             document.getElementById('steps').innerText = steps;
             worlds[this_world].drawTo(scene, position);
+        }
+
+        function updateInputSet(char){
+            for(var i=0; i< inputSets.length; i++){
+                if(inputSets[i].indexOf(char) > -1) {
+                    lastInput = i;
+                    return i;
+                }
+            }
+            return -1;
         }
 
         function controller(event){
@@ -166,6 +206,7 @@
             if('2sfhk;'.indexOf(key) > -1) direction = 3;
 
             if('0zxcvbnm,./ '.indexOf(key) > -1){
+                updateInputSet(key);
                 if(position.length > 0){
                     position.splice(-1,1);
                     steps++;
