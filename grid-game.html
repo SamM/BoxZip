@@ -4,10 +4,12 @@
     <title>2D Grid Navigating Game</title>
     <script src="BoxZip.js" type="text/javascript"></script>
     <script type="text/javascript">
+
         const NUM_GATES = 30;
         const NUM_WORLDS = 10;
         const MIN_LOCATION = 32;
         const MAX_LOCATION = 1024;
+
         let scene;
 
         let size;
@@ -18,14 +20,16 @@
         let prevWorlds = [];
 
         let this_world = 0;
-
+        let target_world = 0;
+        
         let worlds = [];
 
-        for(var i=0; i<NUM_WORLDS; i++){
-            worlds.push(new World(i));
-        }
+        let points = 0;
 
-        function RandomWorld(){
+        
+
+        function RandomWorld(justIndex){
+            if(justIndex) return Math.floor(Math.random()*worlds.length);
             return worlds[Math.floor(Math.random()*worlds.length)];
         }
 
@@ -90,10 +94,48 @@
             let ctx = scene.getContext('2d');
             ctx.fillStyle = worlds[this_world].color.toString();
             ctx.fillRect(0,0,size,size);
+            document.body.style.backgroundColor = worlds[target_world].color.toString();
+        }
+
+        function toVariable(str){
+            if(str.toLowerCase() === 'true') return true;
+            if(str.toLowerCase() === 'false') return false;
+            if(str.indexOf(/[^0-9\.\+\-]/g) > -1) return str;
+            return parseFloat(str);
+        }
+
+        function getQuery(){
+            let query = location.href.split('?');
+            let out = {};
+            if(query.length == 1) return out;
+            query = query[1].split('&').forEach(function(str){
+                str = str.split('=');
+                if(str.length==1) out[str.toLowerCase()] = true;
+                else out[str[0].toLowerCase()] = toVariable(str.slice(1).join('='))
+            });
+            return out;
+        }
+
+        function nextTarget(){
+            while(target_world == this_world) target_world = RandomWorld(true);
         }
 
         function start(){
             scene = document.getElementById('scene');
+            let query = getQuery();
+            
+            if(typeof query.n == 'number'){
+                NUM_WORLDS = Math.round(query.n);
+            }
+
+            if(NUM_WORLDS < 3) NUM_WORLDS = 3;
+
+            for(var i=0; i<NUM_WORLDS; i++){
+                worlds.push(new World(i));
+            }
+
+            nextTarget();
+            
             resizeCanvas();
             PopulateWorlds(NUM_GATES);
             worlds[this_world].drawTo(scene, position);
@@ -101,6 +143,7 @@
 
         function update(){
             resizeCanvas();
+            document.getElementById('score').innerText = points;
             worlds[this_world].drawTo(scene, position);
         }
 
@@ -115,18 +158,22 @@
                 key = event.keyCode
             }
             key = parseInt(key+"");
-            if(key === 7) direction = 0;
-            if(key === 9) direction = 1;
+            if(key === 4) direction = 0;
+            if(key === 5) direction = 1;
             if(key === 1) direction = 2;
-            if(key === 3) direction = 3;
+            if(key === 2) direction = 3;
 
-            if(key === 5){
+            if(key === 0){
                 if(position.length > 0){
                     position.splice(-1,1);
                 }else if(prevWorlds.length > 0){
                     position = prevPositions.shift();
                     position.splice(-1,1);
                     this_world = prevWorlds.shift();
+                    if(this_world == target_world){
+                        points++;
+                        nextTarget();
+                    }
                 }
                 handled = true; 
             }
@@ -143,6 +190,10 @@
                     prevWorlds.unshift(this_world);
                     this_world = matches[0].world.id;
                     position = [];
+                    if(this_world == target_world){
+                        points++;
+                        nextTarget();
+                    }
                 }
                 handled = true;
             }
@@ -162,15 +213,23 @@
     <style>
         #scene{
             background-color: black;
+            transform: scale(0.8);
+        }
+        #side-panel {
+            position: absolute;
+            width: 100%;
+            text-align: center;
         }
         html, body{
             padding: 0;
             margin: 0;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
+    <div id="side-panel"><h1 class="score-label">Score: <span id="score">0</span></h1></div>
     <canvas id="scene" width=100 height=100></div>
 </body>
 
