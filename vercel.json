@@ -8,6 +8,5 @@
     "routes": [
         { "src": "/game", "dest": "/grid-game.html"},
         { "src": "/", "dest": "/grid-game.html"}
-    ],
-    "clearUrls" : true
+    ]
 }
