@@ -17,6 +17,8 @@
 
         const DRAW_DEPTH = 2;
 
+        const COLOR_THRESHOLD = 0.2;
+
         let seed;
 
         let scene;
@@ -40,6 +42,9 @@
         let inputSets = ['45120 ', 'qwaszx ', 'erdfcv ', 'tyghbn ', 'uijkm, ', 'opl;./ '];
         let lastInput = 0;
 
+        let colors_used = [];
+        let locations_used = [];
+
         function RandomWorld(justIndex){
             if(justIndex) return Math.floor(Math.random()*worlds.length);
             return worlds[Math.floor(Math.random()*worlds.length)];
@@ -47,7 +52,32 @@
 
         function RandomColor(alpha){
             if(alpha === undefined) alpha = 1;
-            return BoxZip.Color(Math.random(),Math.random(),Math.random(),alpha);
+            function randomize(){
+                return BoxZip.Color(Math.random(), Math.random(), Math.random());
+            }
+            let color = randomize();
+
+            function match(used){
+                let diff = color.difference(used);
+                return diff <= COLOR_THRESHOLD;
+            }
+            
+            while(colors_used.filter(match).length > 0){
+                color = randomize();
+            }
+            colors_used.push(color);
+            return color;
+        }
+        function RandomLocation(world){
+            function randomize(){
+                return MIN_LOCATION+Math.floor(Math.random()*(MAX_LOCATION-MIN_LOCATION));
+            }
+            let location = randomize();
+            while(locations_used.indexOf(location) > -1){
+                location = randomize();
+            }
+            locations_used.push(location);
+            return location;
         }
 
         function World(i, color){
@@ -98,12 +128,7 @@
             if(depth > 0) this.world.drawTo(canvas, position, new_offset, depth);
         }
 
-        function RandomLocation(world){
-            function randomize(){
-                return MIN_LOCATION+Math.floor(Math.random()*(MAX_LOCATION-MIN_LOCATION));
-            }
-            return randomize();
-        }
+        
 
         function PopulateWorlds(steps){
             if(typeof steps != 'number') return;

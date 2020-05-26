@@ -312,6 +312,8 @@ BoxZip.Color = function(r,g,b,a){
         setter(k)(arguments[i]);
     }
 
+    if(a === undefined) this.a = 1;
+
 };
 BoxZip.Color.prototype.blend = function(color){
     if(color instanceof BoxZip.Color){
@@ -322,6 +324,9 @@ BoxZip.Color.prototype.blend = function(color){
         return new BoxZip.Color(r,g,b,a);
     }
     return this;
+}
+BoxZip.Color.prototype.difference = function(other){
+    return (Math.abs(this.r - other.r) + Math.abs(this.g - other.g) + Math.abs(this.b - other.b)) / 3;
 }
 BoxZip.Color.prototype.toString = function(){
     let to256 = d=>Math.floor(d * 255);
