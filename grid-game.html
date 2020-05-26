@@ -15,6 +15,8 @@
         const MIN_LOCATION = 32;
         const MAX_LOCATION = 1024;
 
+        const DRAW_DEPTH = 2;
+
         let seed;
 
         let scene;
@@ -53,8 +55,10 @@
             this.color = color ? color : RandomColor();
             this.contents = [];
             this.add =  function(gate) { this.contents.push(gate); };
-            this.drawTo = function(canvas, position) {
-                this.contents.forEach((gate)=>gate.drawTo.call(gate, canvas, position));
+            this.drawTo = function(canvas, position, offset, depth) {
+                depth = typeof depth == 'number' && depth >= 0 ? depth : DRAW_DEPTH;
+                if(depth === 0) return;
+                this.contents.forEach((gate)=>gate.drawTo.call(gate, canvas, position, offset, depth));
             };
         }
         
@@ -63,12 +67,18 @@
             this.location = place;
             this.world = world;
         }
-        Gate.prototype.drawTo = function(canvas, position){
+        Gate.prototype.drawTo = function(canvas, position, offset, depth){
             let area = BoxZip[2](this.location);
             let zoom_path = BoxZip[2](position).toPath();
             let area_path = area.toPath();
+            let offset_path = BoxZip[2](offset).toPath();
+            area_path = offset_path.concat(area_path);
             if(!BoxZip.PathsMatch(area_path, zoom_path)) return;
-            
+
+            depth = typeof depth == 'number' && depth >= 0 ? depth : DRAW_DEPTH;
+            if(depth === 0) return;
+            depth--;
+
             area_path = BoxZip.minus(area_path, zoom_path);
             area = BoxZip[2](area_path).toArea();
 
@@ -83,6 +93,9 @@
 
             ctx.fillStyle = this.world.color.toString();
             ctx.fillRect(x*s,y*s,w*s,h*s);
+
+            new_offset = BoxZip[2](this.location).toPath().concat(offset_path);
+            if(depth > 0) this.world.drawTo(canvas, position, new_offset, depth);
         }
 
         function RandomLocation(world){
@@ -105,7 +118,7 @@
         }
 
         function resizeCanvas(){
-            size = Math.min(window.innerHeight, window.innerWidth);
+            size = Math.min(window.innerHeight, window.innerWidth) * 1;
             scene.width = size;
             scene.height = size;
             let ctx = scene.getContext('2d');
@@ -145,6 +158,28 @@
                 worlds[i].add(new Gate(RandomLocation(worlds[i]), worlds[next]));
             }
         }
+
+        function sceneClick(e){
+            if(paused) return;
+            var rect = e.target.getBoundingClientRect();
+            var x = e.clientX - rect.left; //x position within the element.
+            var y = e.clientY - rect.top;  //y position within the element.
+            let location = 0;
+            if(x >= scene.width / 2) location += 1;
+            if(y >= scene.height / 2) location += 2;
+            ZoomIn(location);
+            if (e.stopPropagation) e.stopPropagation()
+            else e.cancelBubble=true;
+            return false;
+        }
+
+        function backgroundClick(){
+            if(paused) return;
+            ZoomOut();
+        }
+
+        let paused = false;
+
         /*/
         ///
         ///     Start Function
@@ -166,6 +201,14 @@
             }
 
             nextTarget();
+
+            scene.addEventListener('click', sceneClick);
+            window.addEventListener('click', backgroundClick);
+
+            window.onfocus = function() {
+                paused = true;
+                setTimeout(function(){ paused = false; }, 10);
+            }
             
             resizeCanvas();
             createKeyHints();
@@ -202,6 +245,44 @@
             return -1;
         }
 
+        function ZoomOut(){
+            if(position.length > 0){
+                position.splice(-1,1);
+                steps++;
+            }else if(prevWorlds.length > 0){
+                position = prevPositions.shift();
+                position.splice(-1,1);
+                this_world = prevWorlds.shift();
+                if(this_world == target_world){
+                    points++;
+                    nextTarget();
+                }
+                steps++;
+            }
+            update();
+        }
+
+        function ZoomIn(direction){
+            position.push(direction);
+            let pos_path = BoxZip[2](position).toPath();
+            let matches = worlds[this_world].contents.filter(function(gate){
+                let gate_path = BoxZip[2](gate.location).toPath();
+                return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
+            });
+            if(matches.length > 0){
+                prevPositions.unshift(position);
+                prevWorlds.unshift(this_world);
+                this_world = matches[0].world.id;
+                position = [];
+                if(this_world == target_world){
+                    points++;
+                    nextTarget();
+                }
+            }
+            steps++;
+            update();
+        }
+
         function controller(event){
             if(event.defaultPrevented) return;
             var handled = false;
@@ -220,46 +301,17 @@
             if('2sfhk;'.indexOf(key) > -1) direction = 3;
 
             if('0zxcvbnm,./ '.indexOf(key) > -1){
-                updateInputSet(key);
-                if(position.length > 0){
-                    position.splice(-1,1);
-                    steps++;
-                }else if(prevWorlds.length > 0){
-                    position = prevPositions.shift();
-                    position.splice(-1,1);
-                    this_world = prevWorlds.shift();
-                    if(this_world == target_world){
-                        points++;
-                        nextTarget();
-                    }
-                    steps++;
-                }
+                ZoomOut();
                 handled = true; 
             }
 
             if(direction !== -1 && !handled) {
-                position.push(direction);
-                let pos_path = BoxZip[2](position).toPath();
-                let matches = worlds[this_world].contents.filter(function(gate){
-                    let gate_path = BoxZip[2](gate.location).toPath();
-                    return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
-                });
-                if(matches.length > 0){
-                    prevPositions.unshift(position);
-                    prevWorlds.unshift(this_world);
-                    this_world = matches[0].world.id;
-                    position = [];
-                    if(this_world == target_world){
-                        points++;
-                        nextTarget();
-                    }
-                }
-                steps++;
+                ZoomIn(direction);
                 handled = true;
             }
-            update();
 
             if(handled){
+                updateInputSet(key);
                 event.preventDefault();
             }
         }
@@ -271,13 +323,16 @@
 
     </script>
     <style>
-        #scene{
-            transform: scale(0.8);
-        }
         .side-panel {
             position: absolute;
             width: 100%;
             text-align: center;
+            -webkit-user-select: none; /* Safari */        
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+            pointer-events: none;
+            opacity: 0.75;
         }
         .side-panel * {
             display: inline-block;
