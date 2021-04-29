@@ -114,6 +114,17 @@ BoxZip.PathToAddress = function(path, locationDepth){
     }
     return address;
 }
+BoxZip.PathToLocation = function(path){
+    var i = 0;
+    var location = 0;
+    var direction;
+    for(var p=0; p<path.length; p++){
+        direction = path[p];
+        if(direction) location += Math.pow(2, i);
+        i++;
+    }
+    return location;
+}
 BoxZip.roundDepth = function(path, byteSize){
     // path : Array
     // depth : Integer

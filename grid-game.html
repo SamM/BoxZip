@@ -14,11 +14,15 @@
         const MAX_WORLDS = 10;
 
         const MIN_LOCATION = 4;
-        const MAX_LOCATION = 128;
+        const MAX_LOCATION = 64;
 
-        const DRAW_DEPTH =2;
+        const DRAW_DEPTH = 10;
 
         const COLOR_THRESHOLD = 0.24;
+
+        const WORLD_IMAGE_SIZE = 1024*2*2;
+
+        const IMAGE_UPDATE_ITERATIONS = 6;
 
         let seed;
 
@@ -106,11 +110,48 @@
             this.color = color ? color : RandomColor();
             this.contents = [];
             this.add =  function(gate) { this.contents.push(gate); };
-            this.drawTo = function(canvas, position, offset, depth) {
-                depth = typeof depth == 'number' && depth >= 0 ? depth : DRAW_DEPTH;
-                if(depth === 0) return;
-                this.contents.forEach((gate)=>gate.drawTo.call(gate, canvas, position, offset, depth));
+            this.drawTo = function(canvas, position, offset) {
+                let zoom_path = BoxZip[2](position).toPath();
+                let offset_path = BoxZip[2](offset).toPath();
+
+                let zoom_area = BoxZip[2](zoom_path).toArea();
+                let offset_area = BoxZip[2](offset_path).toArea();
+                if(offset instanceof Location) throw new Error("weird offset", offset);
+                console.log(offset, offset_area);
+
+                let ss = WORLD_IMAGE_SIZE;
+                let ds = canvas.width;
+                let sx = zoom_area[0][0];
+                let sw = zoom_area[0][1] - sx;
+                let sy = zoom_area[1][0];
+                let sh = zoom_area[1][1] - sy;
+
+                let dx = offset_area[0][0];
+                let dw = offset_area[0][1] - dx;
+                let dy = offset_area[1][0];
+                let dh = offset_area[1][1] - dy;
+
+                let ctx = canvas.getContext('2d');
+
+                ctx.drawImage(this.canvas, sx*s,sy*s,sw*s,sh*s, dx*ds, dy*ds, dw*ds, dh*ds);
             };
+            this.update = function(){
+                let canvas = this.canvas;
+                let ctx = canvas.getContext('2d');
+                let s = WORLD_IMAGE_SIZE;
+                ctx.fillStyle = this.color.toString();
+                ctx.fillRect(0,0,s,s);
+                this.contents.forEach((gate)=>gate.drawTo.call(gate, canvas));
+            }
+
+            // World Image
+            this.canvas = document.createElement('canvas');
+            let s = WORLD_IMAGE_SIZE;
+            this.canvas.height = this.canvas.width = s;
+            let ctx = this.canvas.getContext('2d');
+            ctx.fillStyle = this.color.toString();
+            ctx.fillRect(0,0,s,s);
+
             this.destinations = [];
         }
         
@@ -119,35 +160,8 @@
             this.location = place;
             this.world = world;
         }
-        Gate.prototype.drawTo = function(canvas, position, offset, depth){
-            let area = BoxZip[2](this.location);
-            let zoom_path = BoxZip[2](position).toPath();
-            let area_path = area.toPath();
-            let offset_path = BoxZip[2](offset).toPath();
-            area_path = offset_path.concat(area_path);
-            if(!BoxZip.PathsMatch(area_path, zoom_path)) return;
-
-            depth = typeof depth == 'number' && depth >= 0 ? depth : DRAW_DEPTH;
-            if(depth === 0) return;
-            depth--;
-
-            area_path = BoxZip.minus(area_path, zoom_path);
-            area = BoxZip[2](area_path).toArea();
-
-            let s = size;
-
-            let x = area[0][0];
-            let w = area[0][1] - x;
-            let y = area[1][0];
-            let h = area[1][1] - y;
-
-            let ctx = canvas.getContext('2d');
-
-            ctx.fillStyle = this.world.color.toString();
-            ctx.fillRect(x*s,y*s,w*s,h*s);
-
-            new_offset = BoxZip[2](this.location).toPath().concat(offset_path);
-            if(depth > 0) this.world.drawTo(canvas, position, new_offset, depth);
+        Gate.prototype.drawTo = function(canvas, position){
+            this.world.drawTo(canvas, position, this.location);
         }
 
         
@@ -268,6 +282,14 @@
             createKeyHints();
             BuildInitialPath();
             PopulateWorlds(NUM_GATES);
+
+            // Update World Images with iterations
+            for(var u=0; u < IMAGE_UPDATE_ITERATIONS; u++){
+                for(var w=0; w<NUM_WORLDS; w++){
+                    worlds[w].update();
+                }
+            }
+
             worlds[this_world].drawTo(scene, position);
         }
 
@@ -293,7 +315,7 @@
             document.getElementById('steps').innerText = steps;
             document.getElementById('depth').innerText = travel_depth;
             document.getElementById('overall').innerText = calculateScore(points, steps);
-            worlds[this_world].drawTo(scene, position);
+            worlds[this_world].drawTo(scene, position, []);
         }
 
         function updateInputSet(char){
