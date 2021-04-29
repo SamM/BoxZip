@@ -31,7 +31,7 @@ body{
 }
 #scene{
     opacity: 42%;
-    transition: opacity 0;
+    transition: opacity 1s;
     z-index: 1;
     filter: drop-shadow(1vmin 1vmin 2vmin rgba(0,0,0,0.5));
     position: relative;
