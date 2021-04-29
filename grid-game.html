@@ -117,7 +117,6 @@
                 let zoom_area = BoxZip[2](zoom_path).toArea();
                 let offset_area = BoxZip[2](offset_path).toArea();
                 if(offset instanceof Location) throw new Error("weird offset", offset);
-                console.log(offset, offset_area);
 
                 let ss = WORLD_IMAGE_SIZE;
                 let ds = canvas.width;
