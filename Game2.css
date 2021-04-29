@@ -27,6 +27,7 @@ body{
     transition: background-color 2.2s;
     transition-timing-function: easeOutCirc();
     height: 100%;
+    touch-action: manipulation;
 }
 #scene{
     opacity: 42%;
