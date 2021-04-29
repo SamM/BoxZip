@@ -2,7 +2,7 @@
 
 <head>
     <title>GateStep - 2D Grid Navigating Game</title>
-    <link rel="stylesheet" href="Game.css">
+    <link rel="stylesheet" href="Game2.css">
     <script src="seedrandom.js" type="text/javascript"></script>
     <script src="BoxZip.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -170,7 +170,7 @@
 
         function resizeCanvas(){
             size = window.innerHeight * 0.6;
-            if(window.innerHeight >= window.innerWidth) size = window.innerWidth * 0.6;
+            if(window.innerHeight >= window.innerWidth * 1.6) size = window.innerWidth * 0.8;
             scene.width = size;
             scene.height = size;
             let ctx = scene.getContext('2d');
@@ -398,9 +398,9 @@
     
     <div class="side-panel bottom">
         <h1 class="depth label left">Depth: <span id="depth">0</span></h1>
-        <h1 class="score label right">Gate Score: <span id="score">0</span></h1>
-        <h1 class="steps label left block">Step Score: <span id="steps">0</span></h1>
-        <h1 class="overall label right">Overall Score: <span id="overall">0</span></h1>
+        <h1 class="score label right">Gates: <span id="score">0</span></h1>
+        <h1 class="steps label left block">Steps: <span id="steps">0</span></h1>
+        <h1 class="overall label right">Score: <span id="overall">0</span></h1>
     </div>
 </body>
 
