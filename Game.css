@@ -1,0 +1,103 @@
+.side-panel {
+    position: absolute;
+    width: 60vh;
+    text-align: center;
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+    pointer-events: none;
+    opacity: 0.75;
+    height:11%;
+    display: flex;
+}
+.side-panel h1 {
+    padding: 1vh 2vh;
+}
+html, body{
+    padding: 0;
+    margin: 0;
+}
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    background-color: hsl(0,0%,10%);
+    transition: background-color 2.2s;
+    transition-timing-function: easeOutCirc();
+    height: 100%;
+}
+#scene{
+    opacity: 42%;
+    transition: opacity 0;
+    z-index: 1;
+    filter: drop-shadow(1vh 1vh 2vh rgba(0,0,0,0.5));
+    position: relative;
+}
+.block{
+    display: inline-block;
+}
+.label{
+    font-size: 2vh;
+    line-height: 3vh;
+    z-index: 2;
+    margin-top: 2vh;
+}
+.label span{
+    display: block;
+}
+.top{
+    top: 10vh;
+}
+.bottom{
+    bottom: 10vh;
+}
+.right{
+    margin-left: auto;
+}
+.logo{
+    font-family: sans-serif;
+    font-weight: normal;
+    display: block;
+    text-transform: capitalize;
+    letter-spacing: 0em;
+    line-height: 0;
+    font-size: 6vh;
+    align-self: flex-end;
+    font-kerning: auto;
+    margin-bottom: 4.5vh;
+}
+.side-panel.top{
+    align-items: center;
+    justify-content: center;
+}
+.logo span{
+    display: inline-block;
+}
+.side-panel{
+    text-shadow: 0px 0px 8px hsla(0,0%,0%,0.84);
+}
+.side-panel.top{
+    background: linear-gradient(180deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0.25) 10%, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 75%, rgba(255,255,255,0.125) 100%);
+    border-top-left-radius:  2vh;
+    border-top-right-radius:  2vh;
+    text-shadow: 0px 2px 8px hsla(0,0%,0%,0.44);
+}
+.logo, .black, .label{
+    color: white;
+}
+.white, .label span{
+    color: white;
+    font-weight: bold;
+}
+.side-panel.bottom{
+    border-bottom-left-radius: 2vh;
+    border-bottom-right-radius:  2vh;
+    text-shadow: 0px 2px 6px hsla(0,0%,0%,1);
+    background: linear-gradient(0deg,rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.1) 25%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%);
+}
+.side-panel.bottom{
+    text-align: center;
+    font-size: 1.2vh!important;
+}
