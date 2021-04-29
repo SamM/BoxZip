@@ -170,6 +170,7 @@
 
         function resizeCanvas(){
             size = window.innerHeight * 0.6;
+            if(window.innerHeight >= window.innerWidth) size = window.innerWidth * 0.6;
             scene.width = size;
             scene.height = size;
             let ctx = scene.getContext('2d');
