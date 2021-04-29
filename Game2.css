@@ -1,6 +1,6 @@
 .side-panel {
     position: absolute;
-    width: calc(100vmin * 0.8);
+    width: min(60vh, 80vw);
     text-align: center;
     -webkit-user-select: none; /* Safari */        
     -moz-user-select: none; /* Firefox */
@@ -50,10 +50,10 @@ body{
     display: block;
 }
 .top{
-    top: 5vh;
+    top: calc(11vh - 5vmin);
 }
 .bottom{
-    bottom: 5vh;
+    bottom: 5vmin;
 }
 .right{
     margin-left: auto;
@@ -65,7 +65,7 @@ body{
     text-transform: capitalize;
     letter-spacing: 0em;
     line-height: 0;
-    font-size: 6vmin;
+    font-size: 6vh;
     align-self: flex-end;
     font-kerning: auto;
     margin-bottom: 4.5vmin;
@@ -73,6 +73,7 @@ body{
 .side-panel.top{
     align-items: center;
     justify-content: center;
+    padding: 5px;
 }
 .logo span{
     display: inline-block;
@@ -81,7 +82,7 @@ body{
     text-shadow: 0px 0px 8px hsla(0,0%,0%,0.84);
 }
 .side-panel.top{
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.0);
     border-radius:  2vmin;
     text-shadow: 0px 2px 8px hsla(0,0%,0%,0.44);
 }
