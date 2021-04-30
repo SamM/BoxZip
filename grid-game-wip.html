@@ -270,7 +270,7 @@
         }
 
         function sceneClick(e){
-            if(paused) return;
+            //if(paused) return;
             var rect = e.target.getBoundingClientRect();
             var x = e.clientX - rect.left; //x position within the element.
             var y = e.clientY - rect.top;  //y position within the element.
@@ -284,11 +284,11 @@
         }
 
         function backgroundClick(){
-            if(paused) return;
+            //if(paused) return;
             ZoomOut();
         }
 
-        let paused = false;
+        //let paused = false;
 
         /*/
         ///
@@ -317,9 +317,7 @@
             scene.addEventListener('click', sceneClick);
             window.addEventListener('click', backgroundClick);
 
-            window.onblur = function() {
-                paused = true;
-            }
+            //window.onblur = function() { paused = true; }
             
             resizeCanvas();
             createKeyHints();
