@@ -94,6 +94,7 @@ body{
 .white, .label span{
     color: white;
     font-weight: bold;
+    font-style: normal;
 }
 .side-panel.bottom{
     border-radius: 2vmin;
