@@ -389,9 +389,9 @@
             
         }
 
-        function calculateScore(points, score){
-            if(score === 0) return 0;
-            return Math.floor(points*points*points/score*1000);
+        function calculateScore(points, steps){
+            if(steps === 0) return 0;
+            return Math.floor((points/steps)*2000);
         }
 
         function updateOutputs(){
