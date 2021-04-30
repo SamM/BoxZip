@@ -18,8 +18,8 @@
         const MAX_GATES = 100;
         const MAX_WORLDS = 10;
 
-        const MIN_LOCATION = 4;
-        const MAX_LOCATION = 64;
+        const MIN_LOCATION = 1;
+        const MAX_LOCATION = 4;
 
         const DRAW_DEPTH = 10;
 
@@ -119,7 +119,7 @@
         function RandomLocation(world){
             let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.destinations) ? world.destinations : [];
             function randomize(){
-                return MIN_LOCATION+Math.floor(Math.random()*(MAX_LOCATION-MIN_LOCATION));
+                return Math.pow(2,MIN_LOCATION)+Math.floor(Math.random()*Math.pow(2, MAX_LOCATION-MIN_LOCATION));
             }
             let location = randomize();
             function getIntersects(location1){
@@ -299,7 +299,8 @@
         function BuildInitialPath(){
             for(var i = 0, next; i < worlds.length; i++){
                 next = (i + 1) % worlds.length;
-                worlds[i].add(new Gate(RandomLocation(worlds[i]), worlds[next]));
+                let location = RandomLocation(worlds[i]);
+                if(location !== 0) worlds[i].add(new Gate(location, worlds[next]));
             }
         }
 
