@@ -12,6 +12,8 @@
 
         let ANIMATE = true;
 
+        const DEFAULT_BG_COLOR = "#202020";
+
         const MAX_GATES = 100;
         const MAX_WORLDS = 10;
 
@@ -205,6 +207,8 @@
                     last_animation = animations_forward[animation_i];
                     if(animation.world_out !== null){
                         document.body.style.backgroundColor = worlds[animation.world_out].color.toString();
+                    }else{
+                        document.body.style.backgroundColor = DEFAULT_BG_COLOR;
                     }
                     animation_i++;
                     console.log('animation step', last_animation)
@@ -349,7 +353,7 @@
             let color = worlds[target_world].color.toString();
             scene.style.border = color + " "+BORDER_WIDTH+" solid";
             scene.style.backgroundColor = color;
-            
+
             if(ANIMATE) update();
         }
 

@@ -23,8 +23,8 @@ body{
     align-items: center;
     justify-content: center;
     font-family: sans-serif;
-    background-color: hsl(0,0%,10%);
-    transition: background-color 2.2s;
+    background-color: #202020;
+    transition: background-color 1.25s;
     transition-timing-function: easeOutCirc();
     height: 100%;
     touch-action: manipulation;
