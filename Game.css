@@ -83,6 +83,30 @@ body{
 .side-panel{
     text-shadow: 0px 0px 8px hsla(0,0%,0%,0.84);
 }
+.button{
+    padding: 1vh 2vh;
+    display: inline-block;
+    border-radius: 2vmin;
+    text-shadow: 0px 2px 6px hsla(0,0%,0%,1);
+    background-color: rgba(0,0,0,0.1);
+    color: white;
+    text-align: center;
+    filter: drop-shadow(0.5vh 0.5vh 1vh rgba(0,0,0,0.8));
+    transition: background-color 0.25s;
+    transition-timing-function: easeOutCirc();
+    cursor: pointer;
+}
+.button:hover{
+    background-color: rgba(255,255,255,0.1);
+}
+#randomize{
+    position: absolute;
+    top: 1vh;
+    left: 1vh;
+}
+.button span{
+    display:block;
+}
 .side-panel.top{
     background-color: rgba(255,255,255,0.0);
     border-radius:  2vmin;

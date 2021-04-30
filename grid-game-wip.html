@@ -3,6 +3,7 @@
 <head>
     <title>ZoomRoom - 2D Grid Navigating Game</title>
     <link rel="stylesheet" href="Game.css">
+    <script src="Random.js" type="text/javascript"></script>
     <script src="seedrandom.js" type="text/javascript"></script>
     <script src="BoxZip.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -63,6 +64,34 @@
 
         let colors_used = [];
         let locations_used = [];
+
+        function getQuery(){
+            let query = location.href.split('?');
+            let out = {};
+            if(query.length == 1) return out;
+            query = query[1].split('&').forEach(function(str){
+                str = str.split('=');
+                if(str.length==1) out[str.toLowerCase()] = true;
+                else out[str[0].toLowerCase()] = toVariable(str.slice(1).join('='))
+            });
+            return out;
+        }
+
+        let query = getQuery();
+
+        function JumpToSeed(seed){
+            query.seed = seed;
+            location.href = location.href.split('?')[0] + "?" + Object.keys(query).map((param)=>param+"="+query[param]).join('&');
+        }
+        function RandomSeed(){
+            let seed = RandomWord(2 + Math.floor(Math.random()*2), Math.random()>0.5);
+            if(Math.random()>0.5) seed += Math.floor(Math.random()*100000);
+            if(Math.random()>0.85) seed += "!";
+            return seed;
+        }
+        if(Object.keys(query).indexOf('seed')===-1){
+            JumpToSeed(RandomSeed());
+        }
 
         function RandomWorld(justIndex){
             if(justIndex) return Math.floor(Math.random()*worlds.length);
@@ -260,18 +289,6 @@
             else return num;
         }
 
-        function getQuery(){
-            let query = location.href.split('?');
-            let out = {};
-            if(query.length == 1) return out;
-            query = query[1].split('&').forEach(function(str){
-                str = str.split('=');
-                if(str.length==1) out[str.toLowerCase()] = true;
-                else out[str[0].toLowerCase()] = toVariable(str.slice(1).join('='))
-            });
-            return out;
-        }
-
         function nextTarget(){
             while(target_world == this_world) target_world = RandomWorld(true);
             let color = worlds[target_world].color.toString();
@@ -315,6 +332,10 @@
         function start(){
             scene = document.getElementById('scene');
             let query = getQuery();
+
+            document.getElementById('randomize').addEventListener("click", (e)=>{
+                JumpToSeed(RandomSeed());
+            });
             
            if(query.seed !== undefined) seed = query.seed;
 
@@ -508,6 +529,8 @@
 </head>
 
 <body>
+    <div class="button" id="randomize"><span>&#x27F3;</span><span>Randomize</span></div>
+
     <div class="side-panel top">
         <h1 class="logo"><span>Zoom</span><span class="white">Room</span></h1>
     </div>
