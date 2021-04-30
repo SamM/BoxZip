@@ -91,13 +91,13 @@ body{
     background-color: rgba(0,0,0,0.1);
     color: white;
     text-align: center;
-    filter: drop-shadow(0.5vh 0.5vh 1vh rgba(0,0,0,0.8));
-    transition: background-color 0.25s;
+    filter: drop-shadow(0.5vh 0.5vh 1vh rgba(0,0,0,0.66));
+    transition: background-color 0.5s;
     transition-timing-function: easeOutCirc();
     cursor: pointer;
 }
 .button:hover{
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(20,20,20,0.85);
 }
 #randomize{
     position: absolute;
