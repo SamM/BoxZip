@@ -95,6 +95,7 @@ body{
     transition: background-color 0.5s;
     transition-timing-function: easeOutCirc();
     cursor: pointer;
+    pointer-events: none;
 }
 .button:hover{
     background-color: rgba(20,20,20,0.85);
