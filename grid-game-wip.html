@@ -36,7 +36,7 @@
 
         let position = [];
 
-        let last_animation = new Animation(0,[],[],0);
+        let last_animation = new Animation(0,[],[],0, null);
         let animations_forward = [];
         let animation_i = 0;
 
@@ -195,6 +195,11 @@
                 if(animation_step >= ANIMATION_STEPS){
                     animation_step = 0;
                     last_animation = animations_forward[animation_i];
+                    if(animation.world_out !== null){
+                        scene.style.border = worlds[animation.world_out].color.toString() + " 10px solid";
+                    }else{
+                        scene.style.border = "0";
+                    }
                     animation_i++;
                     console.log('animation step', last_animation)
                 }
@@ -378,16 +383,16 @@
             if(position.length > 0){
                 position.splice(-1,1);
                 steps++;
-                animations_forward.push(new Animation(this_world, old_position, position, this_world));
+                let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
             }else if(prevWorlds.length > 0){
-                //console.log('hello')
                 position = prevPositions.shift();
                 old_position = position.slice();
                 position.splice(-1,1);
                 let old_this_world = this_world;
                 this_world = prevWorlds.shift();
-                //console.log(new Animation(this_world, old_position, position, this_world))
-                animations_forward.push(new Animation(this_world, old_position, position, this_world));
+                let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
                 if(this_world == target_world){
                     points++;
                     nextTarget();
@@ -401,12 +406,13 @@
             if(!ANIMATE) update();
         }
 
-        function Animation(world_from, position_from, position_to, world_to){
+        function Animation(world_from, position_from, position_to, world_to, outter_world){
             this.world_from = world_from;
             this.position_from = position_from;
             this.position_to = position_to;
             this.world_to = world_to;
             this.position_end = world_to === world_from ? position_to : [];
+            this.world_out = outter_world;
         }
 
         function ZoomIn(direction){
@@ -425,14 +431,16 @@
                 prevWorlds.unshift(this_world);
                 let old_this_world = this_world;
                 this_world = matches[0].world.id;
-                animations_forward.push(new Animation(old_this_world, old_position, prevPositions[0], this_world));
+                let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                animations_forward.push(new Animation(old_this_world, old_position, prevPositions[0], this_world, world_out));
                 position = [];
                 if(this_world == target_world){
                     points++;
                     nextTarget();
                 }
             }else{
-                animations_forward.push(new Animation(this_world, old_position, position, this_world));
+                let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
             }
             
             steps++;
