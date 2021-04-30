@@ -28,6 +28,8 @@
 
         const ANIMATION_STEPS = 12;
 
+        const BORDER_WIDTH = "2vh";
+
         let seed;
 
         let scene;
@@ -184,8 +186,14 @@
             this.world.drawTo(canvas, position, this.location);
         }
 
+        function clearCanvas(){
+            let ctx = scene.getContext("2d");
+            ctx.clearRect(0,0,scene.width,scene.height);
+        }
+
         function update(){
             resizeCanvas();
+            clearCanvas();
 
             if(animations_forward.length > animation_i){
                 // Animating
@@ -196,9 +204,7 @@
                     animation_step = 0;
                     last_animation = animations_forward[animation_i];
                     if(animation.world_out !== null){
-                        scene.style.border = worlds[animation.world_out].color.toString() + " 10px solid";
-                    }else{
-                        scene.style.border = "0";
+                        document.body.style.backgroundColor = worlds[animation.world_out].color.toString();
                     }
                     animation_i++;
                     console.log('animation step', last_animation)
@@ -239,7 +245,6 @@
             let ctx = scene.getContext('2d');
             ctx.fillStyle = worlds[this_world].color.toString();
             ctx.fillRect(0,0,size,size);
-            document.body.style.backgroundColor = worlds[target_world].color.toString();
         }
 
         function toVariable(str){
@@ -265,6 +270,9 @@
 
         function nextTarget(){
             while(target_world == this_world) target_world = RandomWorld(true);
+            let color = worlds[target_world].color.toString();
+            scene.style.border = color + " "+BORDER_WIDTH+" solid";
+            scene.style.backgroundColor = color;
         }
 
         function BuildInitialPath(){
@@ -338,6 +346,10 @@
 
             worlds[this_world].drawTo(scene, position);
 
+            let color = worlds[target_world].color.toString();
+            scene.style.border = color + " "+BORDER_WIDTH+" solid";
+            scene.style.backgroundColor = color;
+            
             if(ANIMATE) update();
         }
 
@@ -402,7 +414,7 @@
 
             travel_depth--;
             if(travel_depth < 0) travel_depth = 0;
-            updateOutputs()
+            updateOutputs();
             if(!ANIMATE) update();
         }
 
@@ -445,7 +457,7 @@
             
             steps++;
             travel_depth++;
-            updateOutputs()
+            updateOutputs();
             if(!ANIMATE) update();
         }
 
