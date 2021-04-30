@@ -10,6 +10,8 @@
         let NUM_GATES = 30;
         let NUM_WORLDS = 10;
 
+        let ANIMATE = true;
+
         const MAX_GATES = 100;
         const MAX_WORLDS = 10;
 
@@ -24,6 +26,8 @@
 
         const IMAGE_UPDATE_ITERATIONS = 6;
 
+        const ANIMATION_STEPS = 12;
+
         let seed;
 
         let scene;
@@ -31,6 +35,12 @@
         let size;
 
         let position = [];
+
+        let last_animation = new Animation(0,[],[],0);
+        let animations_forward = [];
+        let animation_i = 0;
+
+        let animation_step = 0;
 
         let prevPositions = [];
         let prevWorlds = [];
@@ -110,16 +120,20 @@
             this.color = color ? color : RandomColor();
             this.contents = [];
             this.add =  function(gate) { this.contents.push(gate); };
-            this.drawTo = function(canvas, position, offset) {
+            this.drawTo = function(canvas, position, offset, step, from_position) {
                 let zoom_path = BoxZip[2](position).toPath();
                 let offset_path = BoxZip[2](offset).toPath();
+                let from_path = BoxZip[2](from_position).toPath();
+                step = typeof step == 'number' ? step : 0;
 
                 let zoom_area = BoxZip[2](zoom_path).toArea();
                 let offset_area = BoxZip[2](offset_path).toArea();
-                if(offset instanceof Location) throw new Error("weird offset", offset);
+                let from_area = BoxZip[2](from_path).toArea();
 
                 let ss = WORLD_IMAGE_SIZE;
                 let ds = canvas.width;
+                let p = (1/ANIMATION_STEPS)*step;
+
                 let sx = zoom_area[0][0];
                 let sw = zoom_area[0][1] - sx;
                 let sy = zoom_area[1][0];
@@ -129,6 +143,13 @@
                 let dw = offset_area[0][1] - dx;
                 let dy = offset_area[1][0];
                 let dh = offset_area[1][1] - dy;
+
+                //console.log(position, from_position);
+
+                sx = (p*zoom_area[0][0])+((1-p)*from_area[0][0]);
+                sw = (p*zoom_area[0][1])+((1-p)*from_area[0][1]) - sx;
+                sy = (p*zoom_area[1][0])+((1-p)*from_area[1][0]);
+                sh = (p*zoom_area[1][1])+((1-p)*from_area[1][1]) - sy;
 
                 let ctx = canvas.getContext('2d');
 
@@ -163,7 +184,31 @@
             this.world.drawTo(canvas, position, this.location);
         }
 
-        
+        function update(){
+            resizeCanvas();
+
+            if(animations_forward.length > animation_i){
+                // Animating
+                let animation = animations_forward[animation_i] || last_animation;
+                worlds[animation.world_from].drawTo(scene, animation.position_to, [], animation_step, animation.position_from);
+                animation_step++;
+                if(animation_step >= ANIMATION_STEPS){
+                    animation_step = 0;
+                    last_animation = animations_forward[animation_i];
+                    animation_i++;
+                    console.log('animation step', last_animation)
+                }
+            }else{
+                // Static - Viewing Level
+                //console.log('lol')
+                animations_forward = [];
+                animation_i = 0;
+                let animation = last_animation;
+                worlds[animation.world_to].drawTo(scene, animation.position_end, [], animation_step, animation.position_end);
+            }
+            
+            if(ANIMATE) window.requestAnimationFrame(update);
+        }        
 
         function PopulateWorlds(steps){
             if(typeof steps != 'number') return;
@@ -272,9 +317,8 @@
             scene.addEventListener('click', sceneClick);
             window.addEventListener('click', backgroundClick);
 
-            window.onfocus = function() {
+            window.onblur = function() {
                 paused = true;
-                setTimeout(function(){ paused = false; }, 10);
             }
             
             resizeCanvas();
@@ -290,6 +334,8 @@
             }
 
             worlds[this_world].drawTo(scene, position);
+
+            if(ANIMATE) update();
         }
 
         let keyHints = {};
@@ -307,14 +353,11 @@
             return Math.floor(points*points*points/score*1000);
         }
 
-        function update(){
-            resizeCanvas();
-            updateKeyHints()
+        function updateOutputs(){
             document.getElementById('score').innerText = points;
             document.getElementById('steps').innerText = steps;
             document.getElementById('depth').innerText = travel_depth;
             document.getElementById('overall').innerText = calculateScore(points, steps);
-            worlds[this_world].drawTo(scene, position, []);
         }
 
         function updateInputSet(char){
@@ -327,45 +370,77 @@
             return -1;
         }
 
+        function CheckIfAnimating(){
+            return animation_step > 0;
+        }
         function ZoomOut(){
+            if(position.length == 0 && prevWorlds.length == 0) return;
+            if(CheckIfAnimating()) return;
+            let old_position = position.slice();
             if(position.length > 0){
                 position.splice(-1,1);
                 steps++;
+                animations_forward.push(new Animation(this_world, old_position, position, this_world));
             }else if(prevWorlds.length > 0){
+                //console.log('hello')
                 position = prevPositions.shift();
+                old_position = position.slice();
                 position.splice(-1,1);
+                let old_this_world = this_world;
                 this_world = prevWorlds.shift();
+                //console.log(new Animation(this_world, old_position, position, this_world))
+                animations_forward.push(new Animation(this_world, old_position, position, this_world));
                 if(this_world == target_world){
                     points++;
                     nextTarget();
                 }
                 steps++;
             }
+
             travel_depth--;
             if(travel_depth < 0) travel_depth = 0;
-            update();
+            updateOutputs()
+            if(!ANIMATE) update();
+        }
+
+        function Animation(world_from, position_from, position_to, world_to){
+            this.world_from = world_from;
+            this.position_from = position_from;
+            this.position_to = position_to;
+            this.world_to = world_to;
+            this.position_end = world_to === world_from ? position_to : [];
         }
 
         function ZoomIn(direction){
+            let old_position = position.slice();
+            if(CheckIfAnimating()) return;
             position.push(direction);
+            //animation_worlds.push(this_world);
             let pos_path = BoxZip[2](position).toPath();
             let matches = worlds[this_world].contents.filter(function(gate){
                 let gate_path = BoxZip[2](gate.location).toPath();
                 return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
             });
+            
             if(matches.length > 0){
                 prevPositions.unshift(position);
                 prevWorlds.unshift(this_world);
+                let old_this_world = this_world;
                 this_world = matches[0].world.id;
+                animations_forward.push(new Animation(old_this_world, old_position, prevPositions[0], this_world));
                 position = [];
                 if(this_world == target_world){
                     points++;
                     nextTarget();
                 }
+            }else{
+                animations_forward.push(new Animation(this_world, old_position, position, this_world));
             }
+            
             steps++;
             travel_depth++;
-            update();
+            updateOutputs()
+            if(!ANIMATE) update();
         }
 
         function controller(event){
