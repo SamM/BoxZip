@@ -70,6 +70,7 @@ body{
     align-self: flex-end;
     font-kerning: auto;
     margin-bottom: 4.5vmin;
+    font-style: italic;
 }
 .side-panel.top{
     align-items: center;
