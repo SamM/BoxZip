@@ -530,7 +530,9 @@
 </head>
 
 <body>
-    <div class="button" id="randomize"><span>&#x27F3;</span><span>Randomize</span></div>
+    <div class="button" id="randomize"><span class="icon">&#x27F3;</span><span class="text">Randomize</span></div>
+    <div class="button" id="back"><span class="icon">&#x293A;</span><span class="text">Back</span></div>
+    <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
 
     <div class="side-panel top">
         <h1 class="logo"><span>Zoom</span><span class="white">Room</span></h1>
@@ -539,6 +541,7 @@
     <canvas id="scene" width=100 height=100></canvas>
     
     <div class="side-panel bottom">
+        <a class="button" href="" id="submit" form="encounter"><span class="icon">&#x2197</span> <span>Submit</span></a>
         <h1 class="depth label left">Depth: <span id="depth">0</span></h1>
         <h1 class="score label right">Gates: <span id="score">0</span></h1>
         <h1 class="steps label left block">Steps: <span id="steps">0</span></h1>

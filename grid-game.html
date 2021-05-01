@@ -18,7 +18,7 @@
         const DEFAULT_BG_COLOR = "#202020";
 
         const MAX_GATES = 100;
-        const MAX_WORLDS = 10;
+        const MAX_WORLDS = 11;
 
         const MIN_LOCATION = 1;
         const MAX_LOCATION = 4;
@@ -419,7 +419,7 @@
             Math.seedrandom(seed);
 
             NUM_WORLDS = 3 + Math.floor(Math.random()*(MAX_WORLDS-3));
-            NUM_GATES = 3 + Math.floor(Math.random()*(MAX_GATES-3));
+            NUM_GATES = 2 + Math.floor(Math.random()*(MAX_GATES-2));
 
             for(var i=0; i<NUM_WORLDS; i++){
                 worlds.push(new World(i));
