@@ -511,15 +511,18 @@
         }
 
         function getCancelledMove(path){
-            let i = path.length-1;
+            let i = 0;
             let n = 0;
             let dirs = '';
-            while(i >= 0){
-                if(path[i] == ZOOMOUT_CHAR) n++;
-                else dirs+=path[i];
-                i--;
+            while(i < path.length-1){
+                if(path[i] == ZOOMOUT_CHAR){
+                    if(dirs.length > 0) dirs = dirs.slice(0,-1);
+                }else{
+                    dirs += path[i];
+                }
+                i++;
             }
-            return parseInt(dirs[0]);
+            return parseInt(dirs[dirs.length-1]);
         }
 
         function UndoStep(skip_animation){
