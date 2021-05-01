@@ -8,15 +8,17 @@
     <script src="lib/BoxZip.js" type="text/javascript"></script>
     <script type="text/javascript">
 
+        let _HALT = false;
+
         let NUM_GATES = 30;
         let NUM_WORLDS = 10;
 
-        let ANIMATE = true;
+        const ANIMATE = true;
 
         const DEFAULT_BG_COLOR = "#202020";
 
         const MAX_GATES = 100;
-        const MAX_WORLDS = 10;
+        const MAX_WORLDS = 11;
 
         const MIN_LOCATION = 1;
         const MAX_LOCATION = 4;
@@ -29,44 +31,19 @@
 
         const IMAGE_UPDATE_ITERATIONS = 6;
 
-        const ANIMATION_STEPS = 12;
+        const ANIMATION_STEPS = 24;
 
         const BORDER_WIDTH = "2vh";
 
-        let seed;
+        const ZOOMOUT_CHAR = '-';
 
-        let scene;
-
-        let size;
-
-        let position = [];
-
-        let last_animation = new Animation(0,[],[],0, null);
-        let animations_forward = [];
-        let animation_i = 0;
-
-        let animation_step = 0;
-
-        let prevPositions = [];
-        let prevWorlds = [];
-
-        let this_world = 0;
-        let target_world = 0;
-        
-        let worlds = [];
-
-        let travel_depth = 0;
-        let points = 0;
-        let steps = 0;
-
-        let inputSets = ['45120 ', 'qwaszx ', 'erdfcv ', 'tyghbn ', 'uijkm, ', 'opl;./ '];
-        let lastInput = 0;
-
-        let colors_used = [];
-        let locations_used = [];
+        let path,prev_path,seed,scene,size,position,last_animation,animations_forward,
+        animation_i,animation_step,prevPositions,prevWorlds,prevTargets,target_cache,
+        cancelHashChange,this_world,target_world,worlds,travel_depth,points = 0,
+        steps,inputSets,lastInput,colors_used,locations_used;
 
         function getQuery(){
-            let query = location.href.split('?');
+            let query = location.href.split('#')[0].split('?');
             let out = {};
             if(query.length == 1) return out;
             query = query[1].split('&').forEach(function(str){
@@ -77,14 +54,24 @@
             return out;
         }
 
+        function getHash(){
+            let value = window.location.hash;
+            if(value.length == 0 || value==="#") return '';
+            return value.slice(1);
+        }
+        function setHash(value){
+            window.location.hash = '#' + value;
+            cancelHashChange=true;
+        }
+
         let query = getQuery();
 
         function JumpToSeed(seed){
             query.seed = seed;
-            location.href = location.href.split('?')[0] + "?" + Object.keys(query).map((param)=>param+"="+query[param]).join('&');
+            location.href = location.href.split('#')[0].split('?')[0] + "?" + Object.keys(query).map((param)=>param+"="+query[param]).join('&');
         }
         function RandomSeed(){
-            let seed = RandomWord(2 + Math.floor(Math.random()*2), Math.random()>0.5);
+            let seed = RandomWord(1 + Math.floor(Math.random()*2), Math.random()>0.5);
             if(Math.random()>0.5) seed += Math.floor(Math.random()*100000);
             if(Math.random()>0.85) seed += "!";
             return seed;
@@ -177,8 +164,6 @@
                 let dy = offset_area[1][0];
                 let dh = offset_area[1][1] - dy;
 
-                //console.log(position, from_position);
-
                 sx = (p*zoom_area[0][0])+((1-p)*from_area[0][0]);
                 sw = (p*zoom_area[0][1])+((1-p)*from_area[0][1]) - sx;
                 sy = (p*zoom_area[1][0])+((1-p)*from_area[1][0]);
@@ -240,11 +225,9 @@
                         document.body.style.backgroundColor = DEFAULT_BG_COLOR;
                     }
                     animation_i++;
-                    //console.log('animation step', last_animation)
                 }
             }else{
                 // Static - Viewing Level
-                //console.log('lol')
                 animations_forward = [];
                 animation_i = 0;
                 let animation = last_animation;
@@ -290,7 +273,18 @@
         }
 
         function nextTarget(){
-            while(target_world == this_world) target_world = RandomWorld(true);
+            if(target_cache.length && target_cache.length > points){
+                target_world = target_cache[points];
+            } else {
+                while(target_world == this_world) target_world = RandomWorld(true);
+                target_cache.push(target_world);
+            }
+            let color = worlds[target_world].color.toString();
+            scene.style.border = color + " "+BORDER_WIDTH+" solid";
+            scene.style.backgroundColor = color;
+        }
+
+        function prevTarget(){
             let color = worlds[target_world].color.toString();
             scene.style.border = color + " "+BORDER_WIDTH+" solid";
             scene.style.backgroundColor = color;
@@ -323,7 +317,88 @@
             ZoomOut();
         }
 
-        //let paused = false;
+        function helpButtonClick(event){
+            event.stopPropagation();
+        }
+
+        function undoButtonClick(event){
+            event.stopPropagation();
+            UndoStep();
+        }
+
+        function randomizeButtonClick(event){
+            event.stopPropagation();
+            JumpToSeed(RandomSeed());
+        }
+
+        function validatePath(path){
+            let p = path.split(/[^0123\-]+/i).join('');
+            while(p[0]==ZOOMOUT_CHAR) p = p.slice(1);
+            let c = 0;
+            let i = '';
+            let o = '';
+            let v = '';
+            while(c < p.length){
+                if(p[c] == ZOOMOUT_CHAR){
+                    if(o.length<i.length){
+                        v+=ZOOMOUT_CHAR;
+                        o += ZOOMOUT_CHAR;
+                    }
+                } else {
+                    i+=p[c];
+                    v+=p[c];
+                }
+                c++;
+            }
+            return v;
+        }
+
+        function reset(){
+            _HALT = false;
+
+            NUM_GATES = 30;
+            NUM_WORLDS = 10;
+
+            path = "";
+            prev_path = "";
+            seed = size = scene = undefined;
+
+            position = [];
+
+            last_animation = new Animation(0,[],[],0, null);
+            animations_forward = [];
+            animation_i = 0;
+
+            animation_step = 0;
+
+            prevPositions = [];
+            prevWorlds = [];
+            prevTargets = [];
+            target_cache = [];
+
+            cancelHashChange = true;
+
+            this_world = 0;
+            target_world = 0;
+            
+            worlds = [];
+
+            travel_depth = 0;
+            points = 0;
+            steps = 0;
+
+            inputSets = ['45120 ', 'qwaszx ', 'erdfcv ', 'tyghbn ', 'uijkm, ', 'opl;./ '];
+            lastInput = 0;
+
+            colors_used = [];
+            locations_used = [];
+
+            document.getElementById('randomize').removeEventListener("click", randomizeButtonClick);
+            window.removeEventListener('click', backgroundClick);
+            document.getElementById('help').removeEventListener('click', helpButtonClick);
+            document.getElementById('undo').removeEventListener('click', undoButtonClick);
+
+        }
 
         /*/
         ///
@@ -331,12 +406,11 @@
         ///
         /*/
         function start(){
+            reset();
             scene = document.getElementById('scene');
             let query = getQuery();
 
-            document.getElementById('randomize').addEventListener("click", (e)=>{
-                JumpToSeed(RandomSeed());
-            });
+            document.getElementById('randomize').addEventListener("click", randomizeButtonClick);
             
            if(query.seed !== undefined) seed = query.seed;
 
@@ -345,18 +419,19 @@
             Math.seedrandom(seed);
 
             NUM_WORLDS = 3 + Math.floor(Math.random()*(MAX_WORLDS-3));
-            NUM_GATES = 3 + Math.floor(Math.random()*(MAX_GATES-3));
+            NUM_GATES = 2 + Math.floor(Math.random()*(MAX_GATES-2));
 
             for(var i=0; i<NUM_WORLDS; i++){
                 worlds.push(new World(i));
             }
 
             nextTarget();
+            prevTargets.push(target_world);
 
             scene.addEventListener('click', sceneClick);
             window.addEventListener('click', backgroundClick);
-
-            //window.onblur = function() { paused = true; }
+            document.getElementById('help').addEventListener('click', helpButtonClick);
+            document.getElementById('undo').addEventListener('click', undoButtonClick);
             
             resizeCanvas();
             createKeyHints();
@@ -376,7 +451,24 @@
             scene.style.border = color + " "+BORDER_WIDTH+" solid";
             scene.style.backgroundColor = color;
 
+            let hash = getHash();
+            ReplaySequence(validatePath(hash));
+
             if(ANIMATE) update();
+        }
+
+        function restart(){
+            _HALT = true;
+            start();
+        }
+
+        function ReplaySequence(seq){
+            if(seq.length>0){
+                for(let i=0; i<seq.length; i++){
+                    if("0123".indexOf(seq[i]) >-1) ZoomIn(parseInt(seq[i]), i!=seq.length-1);
+                    if(seq[i] == ZOOMOUT_CHAR) ZoomOut(i!=seq.length-1);
+                }
+            }
         }
 
         let keyHints = {};
@@ -414,15 +506,94 @@
         function CheckIfAnimating(){
             return animation_step > 0;
         }
-        function ZoomOut(){
+
+        function getCancelledMove(path){
+            let i = path.length-1;
+            let n = 0;
+            let dirs = '';
+            while(i >= 0){
+                if(path[i] == ZOOMOUT_CHAR) n++;
+                else dirs+=path[i];
+            }
+            return dirs[dirs.length-1];
+        }
+
+        function UndoStep(skip_animation){
+            if(steps == 0) return;
+            if(CheckIfAnimating()) return;
+            
+            let direction = path[path.length-1];
+            let target = prevTargets.splice(-1,1)[0];
+            let prev_target = prevTargets[prevTargets.length-1];
+            let old_position = position.slice();
+            if(direction === ZOOMOUT_CHAR){
+                // Undo Zoom Out
+                direction = parseInt(getCancelledMove(path));
+                position.push(direction);
+                let pos_path = BoxZip[2](position).toPath();
+                let matches = worlds[this_world].contents.filter(function(gate){
+                    let gate_path = BoxZip[2](gate.location).toPath();
+                    return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
+                });
+                
+                if(matches.length > 0){
+                    prevPositions.unshift(position);
+                    prevWorlds.unshift(this_world);
+                    let old_this_world = this_world;
+                    this_world = matches[0].world.id;
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    let a = new Animation(old_this_world, old_position, prevPositions[0], this_world, world_out);
+                    animations_forward.push(a);
+                    position = [];
+                }else{
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    let a = new Animation(this_world, old_position, position, this_world, world_out);
+                    animations_forward.push(a);
+                }
+                travel_depth++;
+            }else{
+                // Undo Zoom In
+                if(position.length > 0){
+                    position.splice(-1,1);
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                }else if(prevWorlds.length > 0){
+                    position = prevPositions.shift();
+                    old_position = position.slice();
+                    position.splice(-1,1);
+                    let old_this_world = this_world;
+                    this_world = prevWorlds.shift();
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                }
+                travel_depth--;
+                if(travel_depth < 0) travel_depth = 0;
+            }
+
+            if(prev_target !== target_world){
+                points--;
+            }
+            target_world = prev_target;
+            prev_path = path;
+            path = path.slice(0,-1);
+            steps--;
+            prevTarget();
+            updateOutputs();
+            setHash(path);
+        }
+
+        function ZoomOut(skip_animation){
             if(position.length == 0 && prevWorlds.length == 0) return;
             if(CheckIfAnimating()) return;
             let old_position = position.slice();
+            prev_path = path;
+            path+=ZOOMOUT_CHAR;
+            
             if(position.length > 0){
                 position.splice(-1,1);
                 steps++;
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
-                animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                if(!skip_animation) animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
             }else if(prevWorlds.length > 0){
                 position = prevPositions.shift();
                 old_position = position.slice();
@@ -430,7 +601,7 @@
                 let old_this_world = this_world;
                 this_world = prevWorlds.shift();
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
-                animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                if(!skip_animation) animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
                 if(this_world == target_world){
                     points++;
                     nextTarget();
@@ -438,25 +609,21 @@
                 steps++;
             }
 
+            prevTargets.push(target_world);
+
             travel_depth--;
             if(travel_depth < 0) travel_depth = 0;
             updateOutputs();
+            setHash(path);
             if(!ANIMATE) update();
         }
 
-        function Animation(world_from, position_from, position_to, world_to, outter_world){
-            this.world_from = world_from;
-            this.position_from = position_from;
-            this.position_to = position_to;
-            this.world_to = world_to;
-            this.position_end = world_to === world_from ? position_to : [];
-            this.world_out = outter_world;
-        }
-
-        function ZoomIn(direction){
+        function ZoomIn(direction, skip_animation){
             let old_position = position.slice();
             if(CheckIfAnimating()) return;
             position.push(direction);
+            prev_path = path;
+            path+=""+direction;
             //animation_worlds.push(this_world);
             let pos_path = BoxZip[2](position).toPath();
             let matches = worlds[this_world].contents.filter(function(gate){
@@ -470,7 +637,7 @@
                 let old_this_world = this_world;
                 this_world = matches[0].world.id;
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
-                animations_forward.push(new Animation(old_this_world, old_position, prevPositions[0], this_world, world_out));
+                if(!skip_animation) animations_forward.push(new Animation(old_this_world, old_position, prevPositions[0], this_world, world_out));
                 position = [];
                 if(this_world == target_world){
                     points++;
@@ -478,13 +645,25 @@
                 }
             }else{
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
-                animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                if(!skip_animation) animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
             }
+
+            prevTargets.push(target_world);
             
             steps++;
             travel_depth++;
             updateOutputs();
+            setHash(path);
             if(!ANIMATE) update();
+        }
+        
+        function Animation(world_from, position_from, position_to, world_to, outter_world){
+            this.world_from = world_from;
+            this.position_from = position_from;
+            this.position_to = position_to;
+            this.world_to = world_to;
+            this.position_end = world_to === world_from ? position_to : [];
+            this.world_out = outter_world;
         }
 
         function controller(event){
@@ -521,7 +700,7 @@
         }
 
         window.addEventListener('load', start);
-        window.addEventListener('resize', update);
+        window.addEventListener('resize', ()=>{if(!ANIMATE) update();});
         window.addEventListener('keypress', controller);
         
 
@@ -531,7 +710,7 @@
 
 <body>
     <div class="button" id="randomize"><span class="icon">&#x27F3;</span><span class="text">Randomize</span></div>
-    <div class="button" id="back"><span class="icon">&#x293A;</span><span class="text">Back</span></div>
+    <div class="button" id="undo"><span class="icon">&#x293A;</span><span class="text">Undo</span></div>
     <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
 
     <div class="side-panel top">
@@ -541,7 +720,6 @@
     <canvas id="scene" width=100 height=100></canvas>
     
     <div class="side-panel bottom">
-        <a class="button" href="" id="submit" form="encounter"><span class="icon">&#x2197</span> <span>Submit</span></a>
         <h1 class="depth label left">Depth: <span id="depth">0</span></h1>
         <h1 class="score label right">Gates: <span id="score">0</span></h1>
         <h1 class="steps label left block">Steps: <span id="steps">0</span></h1>

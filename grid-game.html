@@ -514,10 +514,8 @@
             while(i >= 0){
                 if(path[i] == ZOOMOUT_CHAR) n++;
                 else dirs+=path[i];
-                i--;
             }
-            if(n > 0) return dirs[dirs.length-n];
-            else return dirs[dirs.length-1];
+            return dirs[dirs.length-1];
         }
 
         function UndoStep(skip_animation){
