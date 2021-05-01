@@ -37,7 +37,7 @@ body{
 .label{
     font-size: 3vmin;
     line-height: 4vmin;
-    margin-top: 0.5vh;
+    padding-top: 0.5vh;
     width: 24%;
 }
 .label span{
@@ -68,8 +68,8 @@ body{
 
 #seedlink{
     align-self:center;
-    margin: 2vh 0 3vh 0;
-    font-size: 2vh;
+    margin: 3vh 0 3vh 0;
+    font-size: 2.5vh;
     display:inline-block;
     padding: 1vmin;
     color: white!important;
@@ -86,7 +86,7 @@ body{
 }
 
 .side-panel h1 {
-    margin: 1vmin 0vmin;
+    margin: 1vmin 0;
 }
 .logo{
     font-family: sans-serif;
