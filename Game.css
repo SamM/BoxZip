@@ -13,12 +13,20 @@ body{
     height: 100%;
     touch-action: manipulation;
 }
+#screen{
+    transition: background-color 1s;
+    transition-timing-function: easeOutCirc();
+}
 .container{
     margin:0;
     padding:0;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.screen_square {
+    width: 100vw;
+    height: 100vh;
 }
 #scene{
     opacity: 42%;
