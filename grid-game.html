@@ -31,7 +31,7 @@
 
         const IMAGE_UPDATE_ITERATIONS = 6;
 
-        const ANIMATION_STEPS = 24;
+        const ANIMATION_STEPS = 20;
 
         const BORDER_WIDTH = "2vh";
 
@@ -135,6 +135,18 @@
             return location;
         }
 
+        function easeOutCirc(x) {
+            return Math.sqrt(1 - Math.pow(x - 1, 2));
+        }
+
+        function easeInOutQuart(x) {
+            return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
+        }
+
+        function easeInOutCubic(x){
+            return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+        }
+
         function World(i, color){
             this.id = i;
             this.color = color ? color : RandomColor();
@@ -152,7 +164,7 @@
 
                 let ss = WORLD_IMAGE_SIZE;
                 let ds = canvas.width;
-                let p = (1/ANIMATION_STEPS)*step;
+                let p = easeInOutCubic((1/ANIMATION_STEPS)*step);
 
                 let sx = zoom_area[0][0];
                 let sw = zoom_area[0][1] - sx;

@@ -31,7 +31,7 @@
 
         const IMAGE_UPDATE_ITERATIONS = 6;
 
-        const ANIMATION_STEPS = 24;
+        const ANIMATION_STEPS = 20;
 
         const BORDER_WIDTH = "2vh";
 
@@ -135,6 +135,18 @@
             return location;
         }
 
+        function easeOutCirc(x) {
+            return Math.sqrt(1 - Math.pow(x - 1, 2));
+        }
+
+        function easeInOutQuart(x) {
+            return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
+        }
+
+        function easeInOutCubic(x){
+            return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+        }
+
         function World(i, color){
             this.id = i;
             this.color = color ? color : RandomColor();
@@ -152,7 +164,7 @@
 
                 let ss = WORLD_IMAGE_SIZE;
                 let ds = canvas.width;
-                let p = (1/ANIMATION_STEPS)*step;
+                let p = easeInOutCubic((1/ANIMATION_STEPS)*step);
 
                 let sx = zoom_area[0][0];
                 let sw = zoom_area[0][1] - sx;
@@ -220,9 +232,9 @@
                     animation_step = 0;
                     last_animation = animations_forward[animation_i];
                     if(animation.world_out !== null){
-                        document.body.style.backgroundColor = worlds[animation.world_out].color.toString();
+                        document.getElementById('screen').style.backgroundColor = worlds[animation.world_out].color.toString();
                     }else{
-                        document.body.style.backgroundColor = DEFAULT_BG_COLOR;
+                        document.getElementById('screen').style.backgroundColor = DEFAULT_BG_COLOR;
                     }
                     animation_i++;
                 }
@@ -716,22 +728,24 @@
 </head>
 
 <body>
-    <div class="button" id="randomize"><span class="icon">&#x27F3;</span><span class="text">Randomize</span></div>
-    <div class="button" id="undo"><span class="icon">&#x293A;</span><span class="text">Undo</span></div>
-    <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
+    <div id="screen" class="container screen_square">
+        <div class="button" id="randomize"><span class="icon">&#x27F3;</span><span class="text">Randomize</span></div>
+        <div class="button" id="undo"><span class="icon">&#x293A;</span><span class="text">Undo</span></div>
+        <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
 
-    <div class="side-panel top">
-        <h1 class="logo"><span>Zoom</span><span class="white">Room</span></h1>
-        <a href="#" id="seedlink"><span class="white">Level:</span> <span id="seed"></span></a>
-    </div>
-    
-    <canvas id="scene" width=100 height=100></canvas>
-    
-    <div class="side-panel bottom">
-        <h1 class="depth label left">Depth: <span id="depth">0</span></h1>
-        <h1 class="score label right">Gates: <span id="score">0</span></h1>
-        <h1 class="steps label left block">Steps: <span id="steps">0</span></h1>
-        <h1 class="overall label right">Score: <span id="overall">0</span></h1>
+        <div class="side-panel top">
+            <h1 class="logo"><span>Zoom</span><span class="white">Room</span></h1>
+            <a href="#" id="seedlink"><span class="white">Level:</span> <span id="seed"></span></a>
+        </div>
+        
+        <canvas id="scene" width=100 height=100></canvas>
+        
+        <div class="side-panel bottom">
+            <h1 class="depth label left">Depth: <span id="depth">0</span></h1>
+            <h1 class="score label right">Gates: <span id="score">0</span></h1>
+            <h1 class="steps label left block">Steps: <span id="steps">0</span></h1>
+            <h1 class="overall label right">Score: <span id="overall">0</span></h1>
+        </div>
     </div>
 </body>
 
