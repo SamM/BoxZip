@@ -27,7 +27,7 @@ body{
     outline: 0;
     border-color: #202020;
     position: relative;
-    transition: border-color 0.75s, background-color 0.75s;
+    transition: border-color 0.5s, background-color 0.5s;
     transition-timing-function: easeOutCirc();
     transition-delay: 0.25s;
 }
@@ -138,8 +138,9 @@ body{
     left: 1vh;
     bottom: 5vmin;
     transition: width 0.1s, height 0.2s;
+    display:none;
 }
-#back{
+#undo{
     position: absolute;
     top: 1vh;
     right: 1vh;

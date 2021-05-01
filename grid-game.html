@@ -33,6 +33,10 @@
 
         const BORDER_WIDTH = "2vh";
 
+        const ZOOMOUT_CHAR = '-';
+
+        let path = "";
+
         let seed;
 
         let scene;
@@ -49,6 +53,8 @@
 
         let prevPositions = [];
         let prevWorlds = [];
+        let prevTargets = [];
+        let target_cache = [];
 
         let this_world = 0;
         let target_world = 0;
@@ -290,7 +296,20 @@
         }
 
         function nextTarget(){
-            while(target_world == this_world) target_world = RandomWorld(true);
+            if(target_cache.length && target_cache.length > points){
+                target_world = target_cache[points];
+                console.log("repeat", target_world);
+            } else {
+                while(target_world == this_world) target_world = RandomWorld(true);
+                target_cache.push(target_world);
+                console.log("fresh", target_world)
+            }
+            let color = worlds[target_world].color.toString();
+            scene.style.border = color + " "+BORDER_WIDTH+" solid";
+            scene.style.backgroundColor = color;
+        }
+
+        function prevTarget(){
             let color = worlds[target_world].color.toString();
             scene.style.border = color + " "+BORDER_WIDTH+" solid";
             scene.style.backgroundColor = color;
@@ -323,6 +342,21 @@
             ZoomOut();
         }
 
+        function helpButtonClick(event){
+            event.stopPropagation();
+        }
+
+        function undoButtonClick(event){
+            event.stopPropagation();
+            UndoStep();
+        }
+
+        function randomizeButtonClick(event){
+            event.stopPropagation();
+            JumpToSeed(RandomSeed());
+        }
+
+
         //let paused = false;
 
         /*/
@@ -334,9 +368,7 @@
             scene = document.getElementById('scene');
             let query = getQuery();
 
-            document.getElementById('randomize').addEventListener("click", (e)=>{
-                JumpToSeed(RandomSeed());
-            });
+            document.getElementById('randomize').addEventListener("click", randomizeButtonClick);
             
            if(query.seed !== undefined) seed = query.seed;
 
@@ -352,10 +384,12 @@
             }
 
             nextTarget();
+            prevTargets.push(target_world);
 
             scene.addEventListener('click', sceneClick);
             window.addEventListener('click', backgroundClick);
-
+            document.getElementById('help').addEventListener('click', helpButtonClick);
+            document.getElementById('undo').addEventListener('click', undoButtonClick);
             //window.onblur = function() { paused = true; }
             
             resizeCanvas();
@@ -414,10 +448,88 @@
         function CheckIfAnimating(){
             return animation_step > 0;
         }
+
+        function getCancelledMove(path){
+            let i = path.length-1;
+            let n = 0;
+            let dirs = '';
+            while(i >= 0){
+                if(path[i] == ZOOMOUT_CHAR) n++;
+                else dirs+=path[i];
+                i--;
+            }
+            if(n > 0) return dirs[dirs.length-n];
+            else return dirs[dirs.length-1];
+        }
+
+        function UndoStep(){
+            if(steps == 0) return;
+            if(CheckIfAnimating()) return;
+            
+            let direction = path[path.length-1];
+            let target = prevTargets.splice(-1,1)[0];
+            let prev_target = prevTargets[prevTargets.length-1];
+            let old_position = position.slice();
+            if(direction === ZOOMOUT_CHAR){
+                // Undo Zoom Out
+                direction = parseInt(getCancelledMove(path));
+                position.push(direction);
+                let pos_path = BoxZip[2](position).toPath();
+                let matches = worlds[this_world].contents.filter(function(gate){
+                    let gate_path = BoxZip[2](gate.location).toPath();
+                    return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
+                });
+                
+                if(matches.length > 0){
+                    prevPositions.unshift(position);
+                    prevWorlds.unshift(this_world);
+                    let old_this_world = this_world;
+                    this_world = matches[0].world.id;
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    let a = new Animation(old_this_world, old_position, prevPositions[0], this_world, world_out);
+                    animations_forward.push(a);
+                    position = [];
+                }else{
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    let a = new Animation(this_world, old_position, position, this_world, world_out);
+                    animations_forward.push(a);
+                }
+                travel_depth++;
+            }else{
+                // Undo Zoom In
+                if(position.length > 0){
+                    position.splice(-1,1);
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                }else if(prevWorlds.length > 0){
+                    position = prevPositions.shift();
+                    old_position = position.slice();
+                    position.splice(-1,1);
+                    let old_this_world = this_world;
+                    this_world = prevWorlds.shift();
+                    let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
+                    animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
+                }
+                travel_depth--;
+                if(travel_depth < 0) travel_depth = 0;
+            }
+
+            if(prev_target !== target_world){
+                points--;
+            }
+            target_world = prev_target;
+            path = path.slice(0,-1);
+            steps--;
+            prevTarget();
+            updateOutputs();
+        }
+
         function ZoomOut(){
             if(position.length == 0 && prevWorlds.length == 0) return;
             if(CheckIfAnimating()) return;
             let old_position = position.slice();
+            path+=ZOOMOUT_CHAR;
+            
             if(position.length > 0){
                 position.splice(-1,1);
                 steps++;
@@ -438,25 +550,19 @@
                 steps++;
             }
 
+            prevTargets.push(target_world);
+
             travel_depth--;
             if(travel_depth < 0) travel_depth = 0;
             updateOutputs();
             if(!ANIMATE) update();
         }
 
-        function Animation(world_from, position_from, position_to, world_to, outter_world){
-            this.world_from = world_from;
-            this.position_from = position_from;
-            this.position_to = position_to;
-            this.world_to = world_to;
-            this.position_end = world_to === world_from ? position_to : [];
-            this.world_out = outter_world;
-        }
-
         function ZoomIn(direction){
             let old_position = position.slice();
             if(CheckIfAnimating()) return;
             position.push(direction);
+            path+=""+direction;
             //animation_worlds.push(this_world);
             let pos_path = BoxZip[2](position).toPath();
             let matches = worlds[this_world].contents.filter(function(gate){
@@ -480,11 +586,22 @@
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
                 animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
             }
+
+            prevTargets.push(target_world);
             
             steps++;
             travel_depth++;
             updateOutputs();
             if(!ANIMATE) update();
+        }
+        
+        function Animation(world_from, position_from, position_to, world_to, outter_world){
+            this.world_from = world_from;
+            this.position_from = position_from;
+            this.position_to = position_to;
+            this.world_to = world_to;
+            this.position_end = world_to === world_from ? position_to : [];
+            this.world_out = outter_world;
         }
 
         function controller(event){
@@ -531,7 +648,7 @@
 
 <body>
     <div class="button" id="randomize"><span class="icon">&#x27F3;</span><span class="text">Randomize</span></div>
-    <div class="button" id="back"><span class="icon">&#x293A;</span><span class="text">Back</span></div>
+    <div class="button" id="undo"><span class="icon">&#x293A;</span><span class="text">Undo</span></div>
     <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
 
     <div class="side-panel top">
