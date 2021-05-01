@@ -75,6 +75,7 @@ body{
     color: white!important;
     text-decoration: none;
     transition: background-color 0.5s;
+    transition-timing-function: easeInCirc();
     border-radius: 1vmin;
 }
 #seedlink:hover{
@@ -114,26 +115,26 @@ body{
 }
 
 .button{
-    padding: 1vh 2vh;
+    padding: 0 1vmin;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border:0;
     border-radius: 2vmin;
     text-shadow: 0 0.25vh 0.45vh hsla(0,0%,0%,0.05);
-    background-color: rgba(0,0,0,0.1);
+    background-color: rgba(20,20,20,0);
     color: white;
     text-align: center;
     filter: drop-shadow(0 0.5vh 0.75vh rgba(0,0,0,0.33));
     transition: background-color 0.5s;
-    transition-timing-function: easeOutCirc();
+    transition-timing-function: easeInCirc();
     -webkit-user-select: none; /* Safari */        
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* IE10+/Edge */
     user-select: none; /* Standard */
     cursor: pointer;
     font-weight: bold;
-    font-size: 3.3vmin;
+    font-size: 3vmin;
     text-decoration: none;
     z-index: 1;
 }
@@ -141,7 +142,7 @@ body{
     background-color: rgba(20,20,20,0.85);
 }
 .button .icon{
-    font-size: 1em;
+    font-size: 6vmin;
 }
 .button span{
     display:inline-block;
@@ -151,21 +152,18 @@ body{
     position: absolute;
     top: 1vh;
     left: 1vh;
-    transition: width 0.1s, height 0.2s;
 }
 
 #help{
     position: absolute;
     left: 1vh;
     bottom: 5vmin;
-    transition: width 0.1s, height 0.2s;
     display:none;
 }
 #undo{
     position: absolute;
     top: 1vh;
     right: 1vh;
-    transition: width 0.1s, height 0.2s;
     
 }
 
