@@ -514,8 +514,9 @@
             while(i >= 0){
                 if(path[i] == ZOOMOUT_CHAR) n++;
                 else dirs+=path[i];
+                i--;
             }
-            return dirs[dirs.length-1];
+            return parseInt(dirs[0]);
         }
 
         function UndoStep(skip_animation){
@@ -528,7 +529,7 @@
             let old_position = position.slice();
             if(direction === ZOOMOUT_CHAR){
                 // Undo Zoom Out
-                direction = parseInt(getCancelledMove(path));
+                direction = getCancelledMove(path);
                 position.push(direction);
                 let pos_path = BoxZip[2](position).toPath();
                 let matches = worlds[this_world].contents.filter(function(gate){
