@@ -66,8 +66,8 @@
 
         let query = getQuery();
 
-        function JumpToSeed(seed){
-            query.seed = seed;
+        function JumpToLevel(seed){
+            query.level = seed;
             location.href = location.href.split('#')[0].split('?')[0] + "?" + Object.keys(query).map((param)=>param+"="+query[param]).join('&');
         }
         function RandomSeed(){
@@ -76,8 +76,8 @@
             if(Math.random()>0.85) seed += "!";
             return seed;
         }
-        if(Object.keys(query).indexOf('seed')===-1){
-            JumpToSeed(RandomSeed());
+        if(Object.keys(query).indexOf('level')===-1){
+            JumpToLevel(RandomSeed());
         }
 
         function RandomWorld(justIndex){
@@ -328,7 +328,7 @@
 
         function randomizeButtonClick(event){
             event.stopPropagation();
-            JumpToSeed(RandomSeed());
+            JumpToLevel(RandomSeed());
         }
 
         function validatePath(path){
@@ -412,7 +412,10 @@
 
             document.getElementById('randomize').addEventListener("click", randomizeButtonClick);
             
-           if(query.seed !== undefined) seed = query.seed;
+           if(query.level !== undefined) seed = query.level;
+
+           document.getElementById('seed').innerText = seed;
+           document.getElementById('seedlink').href = window.location.href.split("#")[0].split('?')[0]+"?level="+seed;
 
            document.getElementById('scene').style.opacity = "100%";
 
@@ -716,6 +719,7 @@
 
     <div class="side-panel top">
         <h1 class="logo"><span>Zoom</span><span class="white">Room</span></h1>
+        <a href="#" id="seedlink"><span class="white">Level:</span> <span id="seed"></span></a>
     </div>
     
     <canvas id="scene" width=100 height=100></canvas>
