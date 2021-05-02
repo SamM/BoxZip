@@ -61,34 +61,6 @@ body{
 .right{
     margin-left: auto;
 }
-canvas.slide {
-    width: 15vmax;
-    height: 15vmax;
-    image-rendering: -moz-crisp-edges;    /* Firefox */
-    image-rendering: -webkit-crisp-edges; /* Webkit (Safari) */
-    image-rendering: pixelated;           /* Chrome */
-    margin: 1vmax;
-    display: inline-block;
-}
-.modal{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height:100vh;
-    background-color: rgba(20,20,20,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-#slides {
-    overflow-y: auto;
-    display: inline-block;
-}
 .side-panel {
     position: absolute;
     width: min(60vh, 80vw);
@@ -127,7 +99,6 @@ canvas.slide {
     margin: 1vmin 0;
 }
 .logo{
-    cursor: pointer;
     font-family: sans-serif;
     font-weight: normal;
     display: block;
@@ -175,6 +146,7 @@ canvas.slide {
     font-weight: bold;
     font-size: 3vmin;
     text-decoration: none;
+    z-index: 1;
 }
 .button:hover{
     background-color: rgba(20,20,20,0.85);
@@ -190,7 +162,6 @@ canvas.slide {
     position: absolute;
     top: 1vh;
     left: 1vh;
-    z-index: 1;
 }
 
 #help{
@@ -199,7 +170,7 @@ canvas.slide {
     bottom: 5vmin;
     display:none;
 }
-#undo, #close_slides{
+#undo{
     position: absolute;
     top: 1vh;
     right: 1vh;
