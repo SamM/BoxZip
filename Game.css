@@ -62,8 +62,8 @@ body{
     margin-left: auto;
 }
 canvas.slide {
-    width: 15vmax;
-    height: 15vmax;
+    width: 12.5vmax;
+    height: 12.5vmax;
     image-rendering: -moz-crisp-edges;    /* Firefox */
     image-rendering: -webkit-crisp-edges; /* Webkit (Safari) */
     image-rendering: pixelated;           /* Chrome */
