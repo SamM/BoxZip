@@ -418,10 +418,6 @@
             target_seed = search[1] === undefined ? '' : search[1];
             color_seed = search[2] === undefined ? '' : search[2];
 
-            if(!level_seed.length || !target_seed.length || !color_seed.length){
-                JumpToLevel(!level_seed.length?RandomSeed():level_seed,!target_seed.length?RandomSeed():target_seed,!color_seed.length?RandomSeed():color_seed);
-            }
-
             position = [];
 
             last_animation = new Animation(0,[],[],0, null);
@@ -468,6 +464,11 @@
         function start(){
             reset();
             
+            if(!level_seed.length || !target_seed.length || !color_seed.length){
+                JumpToLevel(!level_seed.length?RandomSeed():level_seed,!target_seed.length?RandomSeed():target_seed,!color_seed.length?RandomSeed():color_seed);
+                return;    
+            }
+
             slides_toggle = !SLIDES_AT_START;
             ToggleSlides();
 
