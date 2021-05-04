@@ -26,8 +26,8 @@ body{
     justify-content: center;
 }
 .screen_square {
-    width: 100vw;
-    height: 100vh;
+    width: 100vmin;
+    height: 100vmin;
 }
 #scene{
     opacity: 42%;
@@ -62,21 +62,18 @@ body{
     margin-left: auto;
 }
 canvas.slide {
-    width: 12.5vmax;
-    height: 12.5vmax;
+    width: 12.5vmin;
+    height: 12.5vmin;
     image-rendering: -moz-crisp-edges;    /* Firefox */
     image-rendering: -webkit-crisp-edges; /* Webkit (Safari) */
     image-rendering: pixelated;           /* Chrome */
-    margin: 1vmax;
+    margin: 1vmin;
     display: inline-block;
+    transition: transform 0.5s;
 }
 canvas.slide:hover {
-    width: 60vmax;
-    height: 60vmax;
-    position: absolute;
-    top: 50vh;
-    left: 50vw;
-    margin: calc(-30vmax - 1vh) 0 0 calc(-30vmax - 1vh);
+    transform: scale3d(2,2,2);
+    position: relative;
 }
 .modal{
     position: absolute;
@@ -94,8 +91,13 @@ canvas.slide:hover {
 }
 
 #slides {
-    overflow-y: auto;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1vmin;
 }
 .side-panel {
     position: absolute;
