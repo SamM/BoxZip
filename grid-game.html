@@ -195,8 +195,11 @@
                 ctx.fillRect(0,0,s,s);
                 let id = this.id;
                 this.contents.filter((gate)=>gate.world.id!==id).forEach((gate)=>gate.drawTo.call(gate, canvas));
-                let same = this.contents.filter((gate)=>gate.world.id===id)
-                same.forEach((gate)=>{same.filter(other=>other!==gate).forEach(other=>{other.drawTo.call(other, canvas)});gate.drawTo.call(gate, canvas);});
+                let same = this.contents.filter((gate)=>gate.world.id===id);
+                same.forEach((gate)=>{
+                    same.filter(other=>other!==gate).forEach(other=>{other.drawTo.call(other, canvas)});
+                    gate.drawTo.call(gate, canvas);
+                });
             }
 
             // World Image
@@ -320,12 +323,14 @@
 
         function sceneClick(e){
             //if(paused) return;
-            var rect = e.target.getBoundingClientRect();
-            var x = e.clientX - rect.left; //x position within the element.
-            var y = e.clientY - rect.top;  //y position within the element.
+            var rect = scene.getBoundingClientRect();
+            let border = parseFloat(getComputedStyle(scene,null).getPropertyValue('border-left-width'));
+            var x = e.clientX - rect.left-border; //x position within the element.
+            var y = e.clientY - rect.top-border;  //y position within the element.
             let location = 0;
             if(x >= scene.width / 2) location += 1;
             if(y >= scene.height / 2) location += 2;
+            console.log(scene.width, scene.height, x,y, location);
             ZoomIn(location);
             if (e.stopPropagation) e.stopPropagation()
             else e.cancelBubble=true;
