@@ -49,18 +49,6 @@
         cancelHashChange,this_world,target_world,worlds,travel_depth,points,
         steps,inputSets,lastInput,colors,targets,slides_toggle,_random;
 
-        function getQuery(){
-            let query = location.href.split('#')[0].split('?');
-            let out = {};
-            if(query.length == 1) return out;
-            query = query[1].split('&').forEach(function(str){
-                str = str.split('=');
-                if(str.length==1) out[str.toLowerCase()] = true;
-                else out[str[0].toLowerCase()] = toVariable(str.slice(1).join('='))
-            });
-            return out;
-        }
-
         function getHash(){
             let value = window.location.hash;
             if(value.length == 0 || value==="#") return '';
@@ -381,7 +369,8 @@
 
         function randomizeButtonClick(event){
             event.stopPropagation();
-            JumpToLevel(Math.random()>0.5?RandomSeed():level_seed,Math.random()>0.5?RandomSeed():target_seed,Math.random()>0.5?RandomSeed():color_seed);
+            let same = Math.random()>0.25;
+            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():target_seed,!same?RandomSeed():color_seed);
         }
 
         function ToggleSlides(){
