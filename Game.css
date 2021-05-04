@@ -70,6 +70,14 @@ canvas.slide {
     margin: 1vmax;
     display: inline-block;
 }
+canvas.slide:hover {
+    width: 60vmax;
+    height: 60vmax;
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    margin: calc(-30vmax - 1vh) 0 0 calc(-30vmax - 1vh);
+}
 .modal{
     position: absolute;
     top: 0;

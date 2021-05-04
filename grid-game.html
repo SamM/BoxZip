@@ -197,8 +197,8 @@
                 this.contents.filter((gate)=>gate.world.id!==id).forEach((gate)=>gate.drawTo.call(gate, canvas));
                 let same = this.contents.filter((gate)=>gate.world.id===id);
                 same.forEach((gate)=>{
-                    same.filter(other=>other!==gate).forEach(other=>{other.drawTo.call(other, canvas)});
-                    gate.drawTo.call(gate, canvas);
+                    for(var i=0; i<IMAGE_UPDATE_ITERATIONS;i++)
+                        gate.drawTo.call(gate, canvas);
                 });
             }
 
