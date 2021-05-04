@@ -136,7 +136,9 @@
             locations_used.push(location);
             return location;
         }
-
+        function linear(x){
+            return x;
+        }
         function easeOutCirc(x) {
             return Math.sqrt(1 - Math.pow(x - 1, 2));
         }
@@ -166,7 +168,7 @@
 
                 let ss = WORLD_IMAGE_SIZE;
                 let ds = canvas.width;
-                let p = easeInOutCubic((1/ANIMATION_STEPS)*step);
+                let p = linear((1/ANIMATION_STEPS)*step);
 
                 let sx = zoom_area[0][0];
                 let sw = zoom_area[0][1] - sx;
