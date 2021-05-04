@@ -25,8 +25,6 @@
 
         const DRAW_DEPTH = 10;
 
-        const COLOR_THRESHOLD = 0.24;
-
         const WORLD_IMAGE_SIZE = 1024*2*2;
 
         const IMAGE_UPDATE_ITERATIONS = 12;
@@ -39,10 +37,17 @@
 
         const SLIDES_AT_START = false;
 
-        let path,prev_path,seed,scene,size,position,last_animation,animations_forward,
+        const COLOR_THRESHOLD = 0.15;
+
+        const COLOR_SATURATION_MIN = 0.6;
+        const COLOR_SATURATION_MAX = 0.95;
+
+        const COLOR_LIGHTNESSES = [0.25,0.5,0.75,0.95];
+
+        let path,prev_path,level_seed,target_seed,color_seed,scene,size,position,last_animation,animations_forward,
         animation_i,animation_step,prevPositions,prevWorlds,prevTargets,target_cache,
-        cancelHashChange,this_world,target_world,worlds,travel_depth,points = 0,
-        steps,inputSets,lastInput,colors_used,locations_used,slides_toggle;
+        cancelHashChange,this_world,target_world,worlds,travel_depth,points,
+        steps,inputSets,lastInput,colors,targets,slides_toggle,_random;
 
         function getQuery(){
             let query = location.href.split('#')[0].split('?');
@@ -66,11 +71,9 @@
             cancelHashChange=true;
         }
 
-        let query = getQuery();
-
-        function JumpToLevel(seed){
-            query.level = seed;
-            location.href = location.href.split('#')[0].split('?')[0] + "?" + Object.keys(query).map((param)=>param+"="+query[param]).join('&');
+        function JumpToLevel(level,target,color){
+            let search = [level,target,color].join('/');
+            location.href = location.href.split('#')[0].split('?')[0] + (search.length>0 ? '?'+search : '');
         }
         function RandomSeed(){
             let seed = RandomWord(1 + Math.floor(Math.random()*2), Math.random()>0.5);
@@ -78,37 +81,46 @@
             if(Math.random()>0.85) seed += "!";
             return seed;
         }
-        if(Object.keys(query).indexOf('level')===-1){
-            JumpToLevel(RandomSeed());
-        }
 
         function RandomWorld(justIndex){
-            if(justIndex) return Math.floor(Math.random()*worlds.length);
-            return worlds[Math.floor(Math.random()*worlds.length)];
+            if(justIndex) return Math.floor(_random.target()*worlds.length);
+            return worlds[Math.floor(_random.level()*worlds.length)];
+        }
+
+        function RandomTarget(){
+            return Math.floor(_random.target()*worlds.length);
+        }
+
+        function palette( /*float*/ t, /*vec3*/ a, /*vec3*/ b, /*vec3*/ c, /*vec3*/ d )
+        {
+            return a + b*Math.cos( 6.28318*(c*t+d) );
         }
 
         function RandomColor(alpha){
             if(alpha === undefined) alpha = 1;
             function randomize(){
-                return BoxZip.Color(Math.random(), Math.random(), Math.random());
+                return BoxZip.ColorFromHSL(_random.color(),COLOR_SATURATION_MIN+_random.color()*(COLOR_SATURATION_MAX-COLOR_SATURATION_MIN),COLOR_LIGHTNESSES[Math.floor(_random.color()*COLOR_LIGHTNESSES.length)],alpha);
             }
             let color = randomize();
-
+            
             function match(used){
                 let diff = color.difference(used);
                 return diff <= COLOR_THRESHOLD;
             }
             
-            while(colors_used.filter(match).length > 0){
+            while(colors.filter(match).length > 0){
                 color = randomize();
             }
-            colors_used.push(color);
+
             return color;
+        }
+        function Color(i, alpha){
+            return (colors[i] || RandomColor(alpha)).toString()
         }
         function RandomLocation(world){
             let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.destinations) ? world.destinations : [];
             function randomize(){
-                return Math.pow(2,MIN_LOCATION)+Math.floor(Math.random()*Math.pow(2, MAX_LOCATION-MIN_LOCATION));
+                return Math.pow(2,MIN_LOCATION)+Math.floor(_random.level()*Math.pow(2, MAX_LOCATION-MIN_LOCATION));
             }
             let location = randomize();
             function getIntersects(location1){
@@ -153,8 +165,10 @@
 
         function World(i, color){
             this.id = i;
-            this.color = color ? color : RandomColor();
+            this.color = i;
             this.contents = [];
+            this.destinations = [];
+
             this.add =  function(gate) { this.contents.push(gate); };
             this.drawTo = function(canvas, position, offset, step, from_position) {
                 let zoom_path = BoxZip[2](position).toPath();
@@ -193,7 +207,7 @@
                 let canvas = this.canvas;
                 let ctx = canvas.getContext('2d');
                 let s = WORLD_IMAGE_SIZE;
-                ctx.fillStyle = this.color.toString();
+                ctx.fillStyle = Color(this.color);
                 ctx.fillRect(0,0,s,s);
                 let id = this.id;
                 this.contents.filter((gate)=>gate.world.id!==id).forEach((gate)=>gate.drawTo.call(gate, canvas));
@@ -209,13 +223,7 @@
             let s = WORLD_IMAGE_SIZE;
             this.canvas.height = this.canvas.width = s;
             this.canvas.className = "slide";
-            this.canvas.style.border = this.color.toString()+" 1vh solid";
-            this.canvas.style.backgroundColor = this.color.toString();
-            let ctx = this.canvas.getContext('2d');
-            ctx.fillStyle = this.color.toString();
-            ctx.fillRect(0,0,s,s);
-
-            this.destinations = [];
+            
         }
         
 
@@ -245,7 +253,7 @@
                     animation_step = 0;
                     last_animation = animations_forward[animation_i];
                     if(animation.world_out !== null){
-                        document.getElementById('screen').style.backgroundColor = worlds[animation.world_out].color.toString();
+                        document.getElementById('screen').style.backgroundColor = Color(worlds[animation.world_out].color);
                     }else{
                         document.getElementById('screen').style.backgroundColor = DEFAULT_BG_COLOR;
                     }
@@ -260,7 +268,17 @@
             }
             
             if(ANIMATE) window.requestAnimationFrame(update);
-        }        
+        }
+
+        function determineNextTarget(){
+            let target = RandomTarget();
+            while(target === (targets.length>0?targets[targets.length-1]:0)) target = RandomTarget();
+            targets.push(target);
+        }
+
+        function determineNextColor(){
+            colors.push(RandomColor());
+        }    
 
         function PopulateWorlds(steps){
             if(typeof steps != 'number') return;
@@ -284,7 +302,7 @@
             scene.width = size;
             scene.height = size;
             let ctx = scene.getContext('2d');
-            ctx.fillStyle = worlds[this_world].color.toString();
+            ctx.fillStyle = Color(worlds[this_world].color);
             ctx.fillRect(0,0,size,size);
         }
 
@@ -301,16 +319,19 @@
             if(target_cache.length && target_cache.length > points){
                 target_world = target_cache[points];
             } else {
-                while(target_world == this_world) target_world = RandomWorld(true);
+                target_world++;
+                if(target_world >= targets.length){
+                    while(target_world + 5 >= targets.length) determineNextTarget();
+                }
                 target_cache.push(target_world);
             }
-            let color = worlds[target_world].color.toString();
+            let color = Color(worlds[targets[target_world]].color);
             scene.style.border = color + " "+BORDER_WIDTH+" solid";
             scene.style.backgroundColor = color;
         }
 
         function prevTarget(){
-            let color = worlds[target_world].color.toString();
+            let color = Color(worlds[this_world].color);
             scene.style.border = color + " "+BORDER_WIDTH+" solid";
             scene.style.backgroundColor = color;
         }
@@ -360,7 +381,7 @@
 
         function randomizeButtonClick(event){
             event.stopPropagation();
-            JumpToLevel(RandomSeed());
+            JumpToLevel(Math.random()>0.5?RandomSeed():level_seed,Math.random()>0.5?RandomSeed():target_seed,Math.random()>0.5?RandomSeed():color_seed);
         }
 
         function ToggleSlides(){
@@ -396,9 +417,21 @@
             NUM_GATES = 30;
             NUM_WORLDS = 10;
 
+            _random = {};
+
             path = "";
             prev_path = "";
             seed = size = scene = undefined;
+
+            let search = window.location.search.length>1?window.location.search.slice(1):'';
+            search = search.split('/');
+            level_seed = search[0] === undefined ? '' : search[0];
+            target_seed = search[1] === undefined ? '' : search[1];
+            color_seed = search[2] === undefined ? '' : search[2];
+
+            if(!level_seed.length || !target_seed.length || !color_seed.length){
+                JumpToLevel(!level_seed.length?RandomSeed():level_seed,!target_seed.length?RandomSeed():target_seed,!color_seed.length?RandomSeed():color_seed);
+            }
 
             position = [];
 
@@ -421,6 +454,8 @@
             target_world = 0;
             
             worlds = [];
+            targets = [];
+            colors = [];
 
             travel_depth = 0;
             points = 0;
@@ -428,9 +463,6 @@
 
             inputSets = ['45120 ', 'qwaszx ', 'erdfcv ', 'tyghbn ', 'uijkm, ', 'opl;./ '];
             lastInput = 0;
-
-            colors_used = [];
-            locations_used = [];
 
             document.getElementById('randomize').removeEventListener("click", randomizeButtonClick);
             document.getElementById('screen').removeEventListener('click', backgroundClick);
@@ -451,28 +483,77 @@
             ToggleSlides();
 
             scene = document.getElementById('scene');
-            let query = getQuery();
 
-            document.getElementById('randomize').addEventListener("click", randomizeButtonClick);
-            
-           if(query.level !== undefined) seed = query.level;
+           _random.level = new Math.seedrandom(level_seed);
+           _random.color = new Math.seedrandom(color_seed);
+           _random.target = new Math.seedrandom(target_seed);
 
-           document.getElementById('seed').innerText = seed;
-           document.getElementById('seedlink').href = window.location.href.split("#")[0].split('?')[0]+"?level="+seed;
+           ///
+           /// Start Level Design
 
-           document.getElementById('scene').style.opacity = "100%";
-
-            Math.seedrandom(seed);
-
-            NUM_WORLDS = 3 + Math.floor(Math.random()*(MAX_WORLDS-3));
-            NUM_GATES = 2 + Math.floor(Math.random()*(MAX_GATES-2));
+            NUM_WORLDS = 3 + Math.floor(_random.level()*(MAX_WORLDS-3));
+            NUM_GATES = 2 + Math.floor(_random.level()*(MAX_GATES-2));
 
             for(var i=0; i<NUM_WORLDS; i++){
                 worlds.push(new World(i));
             }
 
+            BuildInitialPath();
+            PopulateWorlds(NUM_GATES);
+
+            /*/
+            /// Generate Colors
+                One for each world
+            /*/
+            for(var i=0;i<worlds.length;i++) determineNextColor();
+            
+            /*/
+            /// Colours required past this point
+            /*/
+
+            /// DRAW SLIDES
+            // Reprint World Images over and over until recursion has been mapped with enough iterations
+            let color = Color(worlds[this_world].color);
+            scene.style.border = color + " "+BORDER_WIDTH+" solid";
+            scene.style.backgroundColor = color;
+
+            let ctx;
+            let s = WORLD_IMAGE_SIZE;
+            for(var i=0; i< NUM_WORLDS; i++){
+                worlds[i].canvas.style.border = Color(worlds[i].color)+" 1vh solid";
+                worlds[i].canvas.style.backgroundColor = Color(worlds[i].color);
+                ctx = worlds[i].canvas.getContext('2d');
+                ctx.fillStyle = Color(worlds[i].color);
+                ctx.fillRect(0,0,s,s);
+            }
+            
+            for(var u=0; u < IMAGE_UPDATE_ITERATIONS; u++){
+                for(var w=0; w<NUM_WORLDS; w++){
+                    worlds[w].update(u);
+                }
+            }
+
+            worlds[this_world].drawTo(scene, position);
+
+            target_world = -1;
             nextTarget();
             prevTargets.push(target_world);
+            
+            ///
+            /// Targets required past this point
+            ///
+            /// Level Design & Targets required past this point
+            let hash = getHash();
+            ReplaySequence(validatePath(hash));
+
+            worlds.forEach(function(world){
+                document.getElementById('slides').appendChild(world.canvas);
+            })
+
+            document.getElementById('randomize').addEventListener("click", randomizeButtonClick);
+            let search = [level_seed, target_seed, color_seed].join('/');
+            document.getElementById('seed').innerText = search;
+            document.getElementById('seedlink').href = window.location.href.split("#")[0].split('?')[0]+(search.length>0?'?'+search:'');
 
             scene.addEventListener('click', sceneClick);
             document.getElementById('screen').addEventListener('click', backgroundClick);
@@ -483,32 +564,8 @@
             document.getElementById('logo').addEventListener('click', closeSlidesButtonClick);
             
             resizeCanvas();
-            createKeyHints();
-            BuildInitialPath();
-            PopulateWorlds(NUM_GATES);
 
-            //nextTarget();
-            //prevTargets.push(target_world);
-
-            // Update World Images with iterations
-            for(var u=0; u < IMAGE_UPDATE_ITERATIONS; u++){
-                for(var w=0; w<NUM_WORLDS; w++){
-                    worlds[w].update(u);
-                }
-            }
-
-            worlds.forEach(function(world){
-                document.getElementById('slides').appendChild(world.canvas);
-            })
-
-            worlds[this_world].drawTo(scene, position);
-
-            let color = worlds[target_world].color.toString();
-            scene.style.border = color + " "+BORDER_WIDTH+" solid";
-            scene.style.backgroundColor = color;
-
-            let hash = getHash();
-            ReplaySequence(validatePath(hash));
+            document.getElementById('scene').style.opacity = "100%";
 
             if(ANIMATE) update();
         }
@@ -630,7 +687,7 @@
                 if(travel_depth < 0) travel_depth = 0;
             }
 
-            if(prev_target !== target_world){
+            if(targets[prev_target] !== targets[target_world]){
                 points--;
             }
             target_world = prev_target;
@@ -662,7 +719,7 @@
                 this_world = prevWorlds.shift();
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
                 if(!skip_animation) animations_forward.push(new Animation(this_world, old_position, position, this_world, world_out));
-                if(this_world == target_world){
+                if(this_world == targets[target_world]){
                     points++;
                     nextTarget();
                 }
@@ -699,7 +756,7 @@
                 let world_out = prevWorlds.length > 0 ? prevWorlds[0] : null;
                 if(!skip_animation) animations_forward.push(new Animation(old_this_world, old_position, prevPositions[0], this_world, world_out));
                 position = [];
-                if(this_world == target_world){
+                if(this_world == targets[target_world]){
                     points++;
                     nextTarget();
                 }

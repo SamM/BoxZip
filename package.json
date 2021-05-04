@@ -1,0 +1,36 @@
+{
+  "name": "boxzip",
+  "version": "1.0.0",
+  "description": "boxzip - pixels revolutionized",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SamM/BoxZip.git"
+  },
+  "keywords": [
+    "binary",
+    "pixels",
+    "infinite",
+    "zoom",
+    "recursion",
+    "graphics",
+    "screens",
+    "images",
+    "website"
+  ],
+  "author": "Samuel Luther Heaps Mulqueen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SamM/BoxZip/issues"
+  },
+  "homepage": "https://github.com/SamM/BoxZip#readme",
+  "dependencies": {
+    "vec3": "^0.1.7"
+  }
+}
