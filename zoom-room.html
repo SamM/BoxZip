@@ -403,6 +403,9 @@
         function reset(){
             _HALT = false;
 
+            slides_toggle = !SLIDES_AT_START;
+            ToggleSlides();
+
             NUM_GATES = 30;
             NUM_WORLDS = 10;
 
@@ -480,9 +483,6 @@
             }
 
             updateSeedLinks();
-
-            slides_toggle = !SLIDES_AT_START;
-            ToggleSlides();
 
             scene = document.getElementById('scene');
 
