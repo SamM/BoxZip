@@ -370,7 +370,7 @@
         function randomizeButtonClick(event){
             event.stopPropagation();
             let same = 1;
-            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():color_seed,same?!RandomSeed():target_seed);
+            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():color_seed,!same?RandomSeed():target_seed);
         }
 
         function ToggleSlides(){
