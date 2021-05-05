@@ -119,20 +119,23 @@ canvas.slide:hover {
     align-self:flex-end;
     margin: 3vh 0 3vh 0;
     font-size: 1.5vh;
-    display:inline-block;
-    padding: 1vmin;
-    color: white!important;
-    text-decoration: none;
     transition: background-color 0.5s;
     transition-timing-function: easeInCirc();
     border-radius: 1vmin;
 }
-#seedlink:hover{
+#seedlink a:hover{
     text-decoration: underline;
     background-color: rgba(20,20,20,0.8);
 }
-#seed{
+#seedlink a{
     font-family: monospace;
+    border-radius: 1vmin;
+    color: white!important;
+    text-decoration: none;
+    padding: 1vmin;
+    display:inline-block;
+    transition: background-color 0.5s;
+    transition-timing-function: easeInCirc();
 }
 
 .side-panel h1 {

@@ -369,8 +369,8 @@
 
         function randomizeButtonClick(event){
             event.stopPropagation();
-            let same = Math.random()>0.25;
-            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():target_seed,!same?RandomSeed():color_seed);
+            let same = 1;
+            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():target_seed,same?!RandomSeed():color_seed);
         }
 
         function ToggleSlides(){
@@ -456,6 +456,15 @@
 
         }
 
+        function updateSeedLinks(){
+            document.getElementById('level_seed').innerText = level_seed;
+            document.getElementById('target_seed').innerText = target_seed;
+            document.getElementById('color_seed').innerText = color_seed;
+            document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed].join('/');
+            document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, target_seed].join('/');
+            document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, '', color_seed].join('/');
+        }
+
         /*/
         ///
         ///     Start Function
@@ -468,6 +477,8 @@
                 JumpToLevel(!level_seed.length?RandomSeed():level_seed,!target_seed.length?RandomSeed():target_seed,!color_seed.length?RandomSeed():color_seed);
                 return;    
             }
+
+            updateSeedLinks();
 
             slides_toggle = !SLIDES_AT_START;
             ToggleSlides();
@@ -541,9 +552,6 @@
             })
 
             document.getElementById('randomize').addEventListener("click", randomizeButtonClick);
-            let search = [level_seed, target_seed, color_seed].join('/');
-            document.getElementById('seed').innerText = search;
-            document.getElementById('seedlink').href = window.location.href.split("#")[0].split('?')[0]+(search.length>0?'?'+search:'');
 
             scene.addEventListener('click', sceneClick);
             document.getElementById('screen').addEventListener('click', backgroundClick);
@@ -822,7 +830,7 @@
         <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
 
         <div class="side-panel top">
-            <a href="#" id="seedlink"><span id="seed"></span></a>
+            <div id="seedlink"><a href="#" id="level_seed"></a>/<a href="#" id="target_seed"></a>/<a href="#" id="color_seed"></a></div>
             <h1 id="logo" class="logo"><span>Zoom</span>-<span class="white">Room</span></h1>
         </div>
         
