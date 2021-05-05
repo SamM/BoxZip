@@ -59,8 +59,8 @@
             cancelHashChange=true;
         }
 
-        function JumpToLevel(level,target,color){
-            let search = [level,target,color].join('/');
+        function JumpToLevel(level,color,target){
+            let search = [level,color,target].join('/');
             location.href = location.href.split('#')[0].split('?')[0] + (search.length>0 ? '?'+search : '');
         }
         function RandomSeed(){
@@ -370,7 +370,7 @@
         function randomizeButtonClick(event){
             event.stopPropagation();
             let same = 1;
-            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():target_seed,same?!RandomSeed():color_seed);
+            JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():color_seed,same?!RandomSeed():target_seed);
         }
 
         function ToggleSlides(){
@@ -415,8 +415,9 @@
             let search = window.location.search.length>1?window.location.search.slice(1):'';
             search = search.split('/');
             level_seed = search[0] === undefined ? '' : search[0];
-            target_seed = search[1] === undefined ? '' : search[1];
-            color_seed = search[2] === undefined ? '' : search[2];
+            color_seed = search[1] === undefined ? '' : search[1];
+            target_seed = search[2] === undefined ? '' : search[2];
+            
 
             position = [];
 
@@ -461,8 +462,8 @@
             document.getElementById('target_seed').innerText = target_seed;
             document.getElementById('color_seed').innerText = color_seed;
             document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed].join('/');
-            document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, target_seed].join('/');
-            document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, '', color_seed].join('/');
+            document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, color_seed].join('/');
+            document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, color_seed, target_seed].join('/');
         }
 
         /*/
@@ -474,7 +475,7 @@
             reset();
             
             if(!level_seed.length || !target_seed.length || !color_seed.length){
-                JumpToLevel(!level_seed.length?RandomSeed():level_seed,!target_seed.length?RandomSeed():target_seed,!color_seed.length?RandomSeed():color_seed);
+                JumpToLevel(!level_seed.length?RandomSeed():level_seed,!color_seed.length?RandomSeed():color_seed,!target_seed.length?RandomSeed():target_seed);
                 return;    
             }
 
@@ -830,7 +831,7 @@
         <div class="button" id="help"><span class="icon">?</span><span class="text">Help</span></div>
 
         <div class="side-panel top">
-            <div id="seedlink"><a href="#" id="level_seed"></a>/<a href="#" id="target_seed"></a>/<a href="#" id="color_seed"></a></div>
+            <div id="seedlink"><a href="#" id="level_seed"></a>/<a href="#" id="color_seed"></a>/<a href="#" id="target_seed"></a></div>
             <h1 id="logo" class="logo"><span>Zoom</span>-<span class="white">Room</span></h1>
         </div>
         
