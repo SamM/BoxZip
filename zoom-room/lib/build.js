@@ -57,7 +57,7 @@ function World(i, color){
         let same = this.contents.filter((gate)=>gate.world.id===id);
         for(var i=0; i<IMAGE_UPDATE_ITERATIONS;i++)
         same.forEach((gate)=>{
-            gate.drawTo.call(gate, canvas, false);
+            gate.drawTo.call(gate, canvas, true);
         });
     }
 
@@ -217,7 +217,7 @@ _modes.easy = function(){
     PopulateWorlds(NUM_GATES);
     PopulateToMin(MIN_GATES);
 }
-_modes.mild = function(){
+_modes.medium = function(){
     MAX_WORLDS = 7;
     MAX_GATES = 256;
     MIN_GATES = 2;
@@ -271,3 +271,22 @@ _modes.hard = function(){
     PopulateWorlds(NUM_GATES);
     PopulateToMin(MIN_GATES);
 }
+_modes.spicy = function(){
+    MAX_WORLDS = 8 +Math.pow(2, Math.floor(_random.level()*4));
+    MIN_GATES = 1;
+    MIN_LOCATION = 2;
+    MAX_LOCATION = 4;
+
+    NUM_WORLDS = 6 + Math.floor(_random.level()*(MAX_WORLDS-6));
+    MAX_GATES = Math.pow(2, Math.floor(_random.level()*3))*NUM_WORLDS;
+    NUM_GATES = NUM_WORLDS * Math.pow(2,Math.floor(_random.level()*6)) - MIN_GATES;
+
+    for(var i=0; i<NUM_WORLDS; i++){
+        worlds.push(new World(i));
+    }
+
+    BuildInitialPath();
+    PopulateToMin(MIN_GATES);
+    PopulateWorlds(NUM_GATES);
+}
+_mode_order = ['easy', 'medium', 'hard', 'spicy', 'fractal']
