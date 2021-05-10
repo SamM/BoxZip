@@ -111,8 +111,8 @@ function determineNextColor(){
 }
 
 function resizeCanvas(){
-    size = window.innerHeight * 0.6;
-    if(window.innerHeight >= window.innerWidth * 1.6) size = window.innerWidth * 0.8;
+    size = window.innerHeight * 0.7;
+    if(window.innerHeight >= window.innerWidth * 1.7) size = window.innerWidth * 0.9;
     scene.width = size;
     scene.height = size;
     let ctx = scene.getContext('2d');

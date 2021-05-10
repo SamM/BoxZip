@@ -58,7 +58,7 @@ body{
     top: calc(2vh - 5vmin);
 }
 .bottom{
-    bottom: 5vmin;
+    bottom: 1vmin;
 }
 .right{
     margin-left: auto;
@@ -153,7 +153,7 @@ canvas.slide:hover {
     font-size: 6vh;
     align-self: center;
     font-kerning: auto;
-    padding-top: 2.5vh;
+    padding-top: 1vh;
     font-style: italic;
 }
 .side-panel.top{
