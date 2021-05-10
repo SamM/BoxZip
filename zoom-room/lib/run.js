@@ -112,7 +112,7 @@ function start(){
    /// Start Level Design
 
     NUM_WORLDS = 4 + Math.floor(_random.level()*(MAX_WORLDS-3));
-    NUM_GATES = 2 + Math.floor(_random.level()*(MAX_GATES-2));
+    NUM_GATES = MIN_GATES + Math.floor(_random.level()*(MAX_GATES-MIN_GATES));
 
     for(var i=0; i<NUM_WORLDS; i++){
         worlds.push(new World(i));
@@ -120,6 +120,7 @@ function start(){
 
     BuildInitialPath();
     PopulateWorlds(NUM_GATES);
+    PopulateToMin(MIN_GATES);
 
     /*/
     /// Generate Colors

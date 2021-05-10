@@ -100,6 +100,27 @@ function PopulateWorlds(steps){
     PopulateWorlds(steps-1);
 }
 
+function PopulateToMin(min){
+    if(typeof min != 'number') return;
+    if(min <= 0) return;
+
+    worlds.filter(world=>world.contents.length < min).forEach(world=>{
+        let world2, location;
+        while(world.contents.length < min){
+            world2 = RandomWorld();
+            location = RandomLocation(world);
+
+            if(location !== 0){
+                let gate = new Gate(location, world2);
+                world.add(gate);
+            }else{
+                break;
+            }
+        }
+    })
+    
+}
+
 function RandomLocation(world){
     let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.destinations) ? world.destinations : [];
     function randomize(){
