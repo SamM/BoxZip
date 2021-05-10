@@ -17,9 +17,9 @@ function reset(){
     search = search.split('/');
     mode = search[0] === undefined ? '' : search[0];
     mode = (Object.keys(_modes).indexOf(mode.toLowerCase()) < 0) ? '' : mode.toLowerCase();
-    level_seed = search[0] === undefined ? '' : search[1];
-    color_seed = search[1] === undefined ? '' : search[2];
-    target_seed = search[2] === undefined ? '' : search[3];
+    level_seed = search[1] === undefined ? '' : search[1];
+    color_seed = search[2] === undefined ? '' : search[2];
+    target_seed = search[3] === undefined ? '' : search[3];
     
 
     position = [];
