@@ -65,6 +65,15 @@ function RandomMode(){
     return _mode;
 }
 
+function NextMode(){
+    let modes = _mode_order;
+    let _mode = modes.indexOf(mode);
+    if(_mode === -1) _mode = 0;
+    else _mode = (_mode + 1) % modes.length;
+    _mode = modes[_mode];
+    return _mode;
+}
+
 function randomizeButtonClick(event){
     event.stopPropagation();
     let same = 1;
@@ -175,7 +184,7 @@ function updateSeedLinks(){
     document.getElementById('level_seed').innerText = level_seed;
     document.getElementById('target_seed').innerText = target_seed;
     document.getElementById('color_seed').innerText = color_seed;
-    document.getElementById('mode').href = window.location.href.split('#')[0].split('?')[0]+'?'+['', level_seed, color_seed, target_seed].join('/');
+    document.getElementById('mode').href = window.location.href.split('#')[0].split('?')[0]+'?'+[NextMode(), level_seed, color_seed, target_seed].join('/');
     document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, '', color_seed, target_seed].join('/');
     document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, level_seed, '', target_seed].join('/');
     document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, level_seed, color_seed, ''].join('/');
