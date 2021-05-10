@@ -10,9 +10,9 @@ function UndoStep(skip_animation){
         // Undo Zoom Out
         direction = getCancelledMove(path);
         position.push(direction);
-        let pos_path = BoxZip[2](position).toPath();
+        let pos_path = Num2Bin(position,2);
         let matches = worlds[this_world].contents.filter(function(gate){
-            let gate_path = BoxZip[2](gate.location).toPath();
+            let gate_path = Num2Bin(gate.location,2);
             return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
         });
         
@@ -105,9 +105,9 @@ function ZoomIn(direction, skip_animation){
     prev_path = path;
     path+=""+direction;
     //animation_worlds.push(this_world);
-    let pos_path = BoxZip[2](position).toPath();
+    let pos_path = Num2Bin(position,2);
     let matches = worlds[this_world].contents.filter(function(gate){
-        let gate_path = BoxZip[2](gate.location).toPath();
+        let gate_path = Num2Bin(gate.location,2);
         return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
     });
     
@@ -173,4 +173,18 @@ function controller(event){
         event.preventDefault();
     }
 }
-
+function sceneClick(e){
+    //if(paused) return;
+    var rect = scene.getBoundingClientRect();
+    let border = parseFloat(getComputedStyle(scene,null).getPropertyValue('border-left-width'));
+    var x = e.clientX - rect.left-border; //x position within the element.
+    var y = e.clientY - rect.top-border;  //y position within the element.
+    let location = 0;
+    if(x >= scene.width / 2) location += 1;
+    if(y >= scene.height / 2) location += 2;
+    console.log(scene.width, scene.height, x,y, location);
+    ZoomIn(location);
+    if (e.stopPropagation) e.stopPropagation()
+    else e.cancelBubble=true;
+    return false;
+}

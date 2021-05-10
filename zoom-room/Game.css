@@ -64,12 +64,12 @@ body{
     margin-left: auto;
 }
 canvas.slide {
-    width: 12.5vmin;
-    height: 12.5vmin;
+    width: 20vmin;
+    height: 20vmin;
     image-rendering: -moz-crisp-edges;    /* Firefox */
     image-rendering: -webkit-crisp-edges; /* Webkit (Safari) */
     image-rendering: pixelated;           /* Chrome */
-    margin: 1vmin;
+    margin: 0;
     display: inline-block;
     transition: transform 0.5s;
 }
@@ -98,8 +98,9 @@ canvas.slide:hover {
     align-items: center;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 1vmin;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0.5vmin;
+    height: 
 }
 .side-panel {
     position: absolute;

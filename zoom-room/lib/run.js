@@ -64,7 +64,7 @@ function update(){
     if(animations_forward.length > animation_i){
         // Animating
         let animation = animations_forward[animation_i] || last_animation;
-        worlds[animation.world_from].drawTo(scene, animation.position_to, [], animation_step, animation.position_from);
+        worlds[animation.world_from].drawTo(scene, false, animation.position_to, [], animation_step, animation.position_from);
         animation_step++;
         if(animation_step >= ANIMATION_STEPS){
             animation_step = 0;
@@ -81,7 +81,7 @@ function update(){
         animations_forward = [];
         animation_i = 0;
         let animation = last_animation;
-        worlds[animation.world_to].drawTo(scene, animation.position_end, [], animation_step, animation.position_end);
+        worlds[animation.world_to].drawTo(scene, true, animation.position_end, [], animation_step, animation.position_end);
     }
     
     if(ANIMATE) window.requestAnimationFrame(update);
@@ -111,7 +111,7 @@ function start(){
    ///
    /// Start Level Design
 
-    NUM_WORLDS = 3 + Math.floor(_random.level()*(MAX_WORLDS-3));
+    NUM_WORLDS = 4 + Math.floor(_random.level()*(MAX_WORLDS-3));
     NUM_GATES = 2 + Math.floor(_random.level()*(MAX_GATES-2));
 
     for(var i=0; i<NUM_WORLDS; i++){
@@ -153,7 +153,7 @@ function start(){
         }
     }
 
-    worlds[this_world].drawTo(scene, position);
+    worlds[this_world].drawTo(scene, true);
 
     target_world = -1;
     nextTarget();
@@ -183,6 +183,8 @@ function start(){
     resizeCanvas();
 
     document.getElementById('scene').style.opacity = "100%";
+
+    debug();
 
     if(ANIMATE) update();
 }

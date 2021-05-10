@@ -1,3 +1,5 @@
+let DEBUG = true;
+
 let _HALT = false;
 
 let NUM_GATES = 30;
@@ -7,15 +9,16 @@ const ANIMATE = true;
 
 const DEFAULT_BG_COLOR = "#202020";
 
-const MAX_GATES = 100;
-const MAX_WORLDS = 11;
+const MAX_GATES = 256;
+const MAX_WORLDS = 16;
 
-const MIN_LOCATION = 1;
-const MAX_LOCATION = 4;
+const MIN_LOCATION = 0;
+const OFFSET_LOCATION = 0;
+const MAX_LOCATION = 1;
 
 const DRAW_DEPTH = 10;
 
-const WORLD_IMAGE_SIZE = 1024*2*2;
+const WORLD_IMAGE_SIZE = 1024*2;
 
 const IMAGE_UPDATE_ITERATIONS = 6;
 

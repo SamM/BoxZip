@@ -59,7 +59,7 @@ function closeSlidesButtonClick(event){
 function randomizeButtonClick(event){
     event.stopPropagation();
     let same = 1;
-    JumpToLevel(same?RandomSeed():level_seed,!same?RandomSeed():color_seed,!same?RandomSeed():target_seed);
+    JumpToLevel(same?RandomSeed():level_seed,same?RandomSeed():color_seed,!same?RandomSeed():target_seed);
 }
 function RandomWorld(justIndex){
     if(justIndex) return Math.floor(_random.target()*worlds.length);
@@ -91,37 +91,7 @@ function RandomColor(alpha){
 function Color(i, alpha){
     return (colors[i] || RandomColor(alpha)).toString()
 }
-function RandomLocation(world){
-    let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.destinations) ? world.destinations : [];
-    function randomize(){
-        return Math.pow(2,MIN_LOCATION)+Math.floor(_random.level()*Math.pow(2, MAX_LOCATION-MIN_LOCATION));
-    }
-    let location = randomize();
-    function getIntersects(location1){
-        let path1 = BoxZip[2](location1).toPath();
-        return locations_used.filter((location2)=>{
-            if(location2 === location1) return true;
-            let path2 = BoxZip[2](location2).toPath();
-            let same = 0;
-            let ideal = Math.min(path2.length, path1.length);
-            for(let i=0; i<ideal; i++){
-                if(path1[i] === path2[i]) same++;
-            }
-            return same === ideal;
-        }).length
-    }
-    
-    let intersects = getIntersects(location);
-    let tries = 500;
-    while(intersects > 0){
-        location = randomize();
-        intersects = getIntersects(location);
-        tries--;
-        if(intersects > 0 && tries <= 0) return 0;
-    }
-    locations_used.push(location);
-    return location;
-}
+
 function determineNextTarget(){
     let target = RandomTarget();
     while(target === (targets.length>0?targets[targets.length-1]:0)) target = RandomTarget();
@@ -129,21 +99,6 @@ function determineNextTarget(){
 }
 function determineNextColor(){
     colors.push(RandomColor());
-}
-function PopulateWorlds(steps){
-    if(typeof steps != 'number') return;
-    if(steps <= 0) return;
-
-    let world = RandomWorld();
-    let world2 = RandomWorld();
-    let location = RandomLocation(world2);
-
-    if(location !== 0){
-        let gate = new Gate(location, world);
-        world2.add(gate);
-    }
-
-    PopulateWorlds(steps-1);
 }
 
 function resizeCanvas(){
@@ -184,29 +139,6 @@ function prevTarget(){
     let color = Color(worlds[this_world].color);
     scene.style.border = color + " "+BORDER_WIDTH+" solid";
     scene.style.backgroundColor = color;
-}
-
-function BuildInitialPath(){
-    for(var i = 0, next; i < worlds.length; i++){
-        next = (i + 1) % worlds.length;
-        let location = RandomLocation(worlds[i]);
-        if(location !== 0) worlds[i].add(new Gate(location, worlds[next]));
-    }
-}
-function sceneClick(e){
-    //if(paused) return;
-    var rect = scene.getBoundingClientRect();
-    let border = parseFloat(getComputedStyle(scene,null).getPropertyValue('border-left-width'));
-    var x = e.clientX - rect.left-border; //x position within the element.
-    var y = e.clientY - rect.top-border;  //y position within the element.
-    let location = 0;
-    if(x >= scene.width / 2) location += 1;
-    if(y >= scene.height / 2) location += 2;
-    console.log(scene.width, scene.height, x,y, location);
-    ZoomIn(location);
-    if (e.stopPropagation) e.stopPropagation()
-    else e.cancelBubble=true;
-    return false;
 }
 function validatePath(path){
     let p = path.split(/[^0123\-]+/i).join('');
