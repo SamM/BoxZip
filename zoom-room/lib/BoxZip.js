@@ -450,9 +450,9 @@ function L(index){
 function Num2Bin(location, byteSize){
     let a, n = location;
     if(Array.isArray(location)){
+        if(location.length === 0) return [];
         let path = [];
         location.forEach(loc=>{path=path.concat(Num2Bin(loc, byteSize))});
-        if(typeof byteSize != 'number' || byteSize < 1) byteSize = 1;
         return path;
     }
     if(typeof location != 'number') return [];
@@ -490,6 +490,11 @@ function Bin2Num(path){
 function BitDepth(location){
     if(location === 0) return 1;
     if(location < 0) location = -location;
+    if(Array.isArray(location)){
+        let d = 0;
+        location.forEach(l=>{d+=BitDepth(l)})
+        return d;
+    }
     let d = 0;
     let n = Math.pow(2, d);
     while(n<=location){
@@ -498,8 +503,8 @@ function BitDepth(location){
     return d;
 }
 
-function NumX(a,b){
-    return Bin2Num(Num2Bin(a).concat(Num2Bin(b-1)));
+function NumX(a,b,d){
+    return Num2Bin(a,d).concat(Num2Bin(b,d));
 }
 
 function BinX(a,b){

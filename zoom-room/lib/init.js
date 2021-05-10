@@ -20,7 +20,7 @@ const MAX_LOCATION = 3;
 
 const DRAW_DEPTH = 10;
 
-const WORLD_IMAGE_SIZE = 1024*2;
+const WORLD_IMAGE_SIZE = 1600*2;
 
 const IMAGE_UPDATE_ITERATIONS = 6;
 

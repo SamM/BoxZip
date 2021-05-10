@@ -34,7 +34,17 @@ function World(i, color){
         let ctx = canvas.getContext('2d');
 
         ctx.drawImage(this.canvas, sx*ss,sy*ss,sw*ss,sh*ss, dx*ds, dy*ds, dw*ds, dh*ds);
-
+        
+        if(redraw_worlds){
+            let pos = Num2Bin(position,2);
+            this.contents.filter(gate=>{
+                let loc = Num2Bin(gate.location,2);
+                return BoxZip.PathsMatch(pos, loc);
+            }).forEach(gate=>{
+                gate.world.drawTo(canvas, false, [], Bin2Num(Num2Bin(gate.location).slice(pos.length)));
+            });
+        }
+        
     };
     this.update = function(i){
         let canvas = this.canvas;
@@ -64,7 +74,7 @@ function Gate(place, world){
     this.world = world;
 }
 Gate.prototype.drawTo = function(canvas, redraw, position){
-    this.world.drawTo(canvas, redraw, position, this.location);
+    this.world.drawTo(canvas, redraw, NumX(position,this.location,2), this.location);
 }
 
 function Animation(world_from, position_from, position_to, world_to, outter_world){

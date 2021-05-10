@@ -106,10 +106,20 @@ function ZoomIn(direction, skip_animation){
     path+=""+direction;
     //animation_worlds.push(this_world);
     let pos_path = Num2Bin(position,2);
+    let any = worlds[this_world].contents.filter(function(gate){
+        let gate_path = Num2Bin(gate.location,2);
+        return BoxZip.PathsMatch(pos_path, gate_path);
+    });
+
+    if(any.length === 0){
+        position.splice(-1);
+        return;
+    }
     let matches = worlds[this_world].contents.filter(function(gate){
         let gate_path = Num2Bin(gate.location,2);
         return (pos_path.length === gate_path.length && BoxZip.PathsMatch(pos_path, gate_path))
     });
+    
     
     if(matches.length > 0){
         prevPositions.unshift(position);
