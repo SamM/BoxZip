@@ -58,7 +58,11 @@ function closeSlidesButtonClick(event){
 
 function RandomMode(){
     let modes = Object.keys(_modes);
-    return modes[Math.floor(Math.random()*modes.length)];
+    let _mode = modes[Math.floor(Math.random()*modes.length)];
+    while(_mode === mode){
+        _mode = modes[Math.floor(Math.random()*modes.length)];
+    }
+    return _mode;
 }
 
 function randomizeButtonClick(event){
