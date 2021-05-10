@@ -194,7 +194,7 @@ _modes.easy = function(){
     PopulateToMin(MIN_GATES);
 }
 _modes.mild = function(){
-    MAX_WORLDS = 11;
+    MAX_WORLDS = 7;
     MAX_GATES = 256;
     MIN_GATES = 2;
     MIN_LOCATION = 1;
