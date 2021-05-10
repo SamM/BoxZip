@@ -108,7 +108,7 @@ function RandomLocation(world){
         }
         let path = RandomStep();
         let i = 0;
-        while(_random.level() > 0.5){
+        while(_random.level() > 0.5 || i < MIN_LOCATION){
             path = path.concat(RandomStep());
             i++;
             if(MAX_LOCATION <= i) break;

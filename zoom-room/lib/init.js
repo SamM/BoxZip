@@ -12,9 +12,9 @@ const DEFAULT_BG_COLOR = "#202020";
 const MAX_GATES = 256;
 const MAX_WORLDS = 16;
 
-const MIN_LOCATION = 0;
+const MIN_LOCATION = 1;
 const OFFSET_LOCATION = 0;
-const MAX_LOCATION = 1;
+const MAX_LOCATION = 3;
 
 const DRAW_DEPTH = 10;
 
