@@ -165,9 +165,9 @@ function updateSeedLinks(){
     document.getElementById('level_seed').innerText = level_seed;
     document.getElementById('target_seed').innerText = target_seed;
     document.getElementById('color_seed').innerText = color_seed;
-    document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed].join('/');
-    document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, color_seed].join('/');
-    document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, color_seed, target_seed].join('/');
+    document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+['', color_seed, target_seed].join('/');
+    document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, '', target_seed].join('/');
+    document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, color_seed, ''].join('/');
 }
 
 function ReplaySequence(seq){
