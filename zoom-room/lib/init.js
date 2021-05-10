@@ -19,8 +19,8 @@ let OFFSET_LOCATION = 0;
 let MAX_LOCATION = 3;
 
 const DRAW_DEPTH = 10;
-
-const WORLD_IMAGE_SIZE = 1600*2;
+                            //512   //1024  //2048  //4096
+const WORLD_IMAGE_SIZE = 256*2      *2      *2;//      *2;
 
 const IMAGE_UPDATE_ITERATIONS = 6;
 
@@ -42,4 +42,4 @@ const COLOR_LIGHTNESSES = [0.25,0.5,0.75,0.95];
 let path,prev_path,level_seed,target_seed,color_seed,scene,size,position,last_animation,animations_forward,
     animation_i,animation_step,prevPositions,prevWorlds,prevTargets,target_cache,
     cancelHashChange,this_world,target_world,worlds,travel_depth,points,
-    steps,inputSets,lastInput,colors,targets,slides_toggle,_random,_modes,mode;
+    steps,inputSets,lastInput,colors,targets,slides_toggle,_random,_modes,mode='',_mode_order;
