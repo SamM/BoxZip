@@ -34,7 +34,7 @@ function World(i, color){
         let ctx = canvas.getContext('2d');
 
         ctx.drawImage(this.canvas, sx*ss,sy*ss,sw*ss,sh*ss, dx*ds, dy*ds, dw*ds, dh*ds);
-        
+        let id = this.id;
         if(redraw_worlds){
             let pos = Num2Bin(position,2);
             this.contents.filter(gate=>{
@@ -93,7 +93,34 @@ function BuildInitialPath(){
         if(location !== 0) worlds[i].add(new Gate(location, worlds[next]));
     }
 }
+function MirrorWorlds(max_mirrors){
+    function MakeMirror(world){
+        
+        let location = RandomLocation(world);
 
+        if(location !== 0){
+            let gate = new Gate(location, world);
+            world.add(gate);
+        }
+    }
+    worlds.forEach(world=>{
+        let i = 1;
+        let gate = new Gate(Math.floor(_random.level()*4), world);
+        world.add(gate);
+        while(_random.level()>=0.66){
+            MakeMirror(world);
+            i++;
+            if(i>max_mirrors) break;
+        }
+        let world2 = RandomWorld();
+        let location = RandomLocation(world);
+
+        if(location !== 0){
+            let gate = new Gate(location, world2);
+            world.add(gate);
+        }
+    });
+}
 function PopulateWorlds(steps){
     if(typeof steps != 'number') return;
     if(steps <= 0) return;
@@ -132,7 +159,7 @@ function PopulateToMin(min){
 }
 
 function RandomLocation(world){
-    let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.destinations) ? world.destinations : [];
+    let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.contents) ? world.contents.map(gate=>gate.location) : [];
     function randomize(){
         function RandomStep(){
             return Num2Bin(Math.floor(_random.level()*4),2);
@@ -148,22 +175,19 @@ function RandomLocation(world){
         //return Math.pow(2,MIN_LOCATION)+OFFSET_LOCATION+Math.floor(_random.level()*Math.pow(2, MAX_LOCATION-MIN_LOCATION));
     }
     let location = randomize();
+
+    console.log(locations_used);
     function getIntersects(location1){
         let path1 = Num2Bin(location1, 2);
         return locations_used.filter((location2)=>{
-            if(location2 === location1) return true;
             let path2 = Num2Bin(location2, 2);
-            let same = 0;
-            let ideal = Math.min(path2.length, path1.length);
-            for(let i=0; i<ideal; i++){
-                if(path1[i] === path2[i]) same++;
-            }
-            return same === ideal;
+            if(Bin2Num(path1) === Bin2Num(path2)) return true;
+            return BoxZip.PathsMatch(path1.length<path2.length?path1:path2, path1.length<path2.length?path2:path1)
         }).length
     }
     
     let intersects = getIntersects(location);
-    let tries = 500;
+    let tries = 100;
     while(intersects > 0){
         location = randomize();
         intersects = getIntersects(location);
@@ -210,6 +234,24 @@ _modes.mild = function(){
     BuildInitialPath();
     PopulateWorlds(NUM_GATES);
     PopulateToMin(MIN_GATES);
+}
+_modes.fractal = function(){
+    MAX_WORLDS = 7;
+    MAX_GATES = 80;
+    MIN_GATES = 2;
+    MIN_LOCATION = 0;
+    MAX_LOCATION = 3;
+
+    NUM_WORLDS = 6 + Math.floor(_random.level()*(MAX_WORLDS));
+    NUM_GATES = MIN_GATES + Math.floor(_random.level()*(MAX_GATES-MIN_GATES));
+
+    for(var i=0; i<NUM_WORLDS; i++){
+        worlds.push(new World(i));
+    }
+
+    MirrorWorlds(2);
+    BuildInitialPath();
+    PopulateWorlds(NUM_GATES);
 }
 _modes.hard = function(){
     MAX_WORLDS = 7;
