@@ -173,3 +173,59 @@ function RandomLocation(world){
     locations_used.push(location);
     return location;
 }
+
+_modes = {};
+_modes.easy = function(){
+    MAX_WORLDS = 5;
+    MAX_GATES = 80;
+    MIN_GATES = 4;
+    MIN_LOCATION = 0;
+    MAX_LOCATION = 2;
+
+    NUM_WORLDS = 4 + Math.floor(_random.level()*(MAX_WORLDS));
+    NUM_GATES = MIN_GATES + Math.floor(_random.level()*(MAX_GATES-MIN_GATES));
+
+    for(var i=0; i<NUM_WORLDS; i++){
+        worlds.push(new World(i));
+    }
+
+    BuildInitialPath();
+    PopulateWorlds(NUM_GATES);
+    PopulateToMin(MIN_GATES);
+}
+_modes.mild = function(){
+    MAX_WORLDS = 11;
+    MAX_GATES = 256;
+    MIN_GATES = 2;
+    MIN_LOCATION = 1;
+    MAX_LOCATION = 3;
+
+    NUM_WORLDS = 6 + Math.floor(_random.level()*(MAX_WORLDS));
+    NUM_GATES = MIN_GATES + Math.floor(_random.level()*(MAX_GATES-MIN_GATES));
+
+    for(var i=0; i<NUM_WORLDS; i++){
+        worlds.push(new World(i));
+    }
+
+    BuildInitialPath();
+    PopulateWorlds(NUM_GATES);
+    PopulateToMin(MIN_GATES);
+}
+_modes.hard = function(){
+    MAX_WORLDS = 7;
+    MAX_GATES = 256*2;
+    MIN_GATES = 1;
+    MIN_LOCATION = 2;
+    MAX_LOCATION = 4;
+
+    NUM_WORLDS = 10 + Math.floor(_random.level()*(MAX_WORLDS));
+    NUM_GATES = MIN_GATES + Math.floor(_random.level()*(MAX_GATES-MIN_GATES));
+
+    for(var i=0; i<NUM_WORLDS; i++){
+        worlds.push(new World(i));
+    }
+
+    BuildInitialPath();
+    PopulateWorlds(NUM_GATES);
+    PopulateToMin(MIN_GATES);
+}

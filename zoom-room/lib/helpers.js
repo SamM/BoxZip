@@ -7,8 +7,8 @@ function setHash(value){
     window.location.hash = '#' + value;
     cancelHashChange=true;
 }
-function JumpToLevel(level,color,target){
-    let search = [level,color,target].join('/');
+function JumpToLevel(mode, level,color,target){
+    let search = [mode,level,color,target].join('/');
     location.href = location.href.split('#')[0].split('?')[0] + (search.length>0 ? '?'+search : '');
 }
 function RandomSeed(){
@@ -56,10 +56,15 @@ function closeSlidesButtonClick(event){
     ToggleSlides();
 }
 
+function RandomMode(){
+    let modes = Object.keys(_modes);
+    return modes[Math.floor(Math.random()*modes.length)];
+}
+
 function randomizeButtonClick(event){
     event.stopPropagation();
     let same = 1;
-    JumpToLevel(same?RandomSeed():level_seed,same?RandomSeed():color_seed,!same?RandomSeed():target_seed);
+    JumpToLevel(RandomMode(),same?RandomSeed():level_seed,same?RandomSeed():color_seed,!same?RandomSeed():target_seed);
 }
 function RandomWorld(justIndex){
     if(justIndex) return Math.floor(_random.target()*worlds.length);
@@ -162,12 +167,14 @@ function validatePath(path){
     return v;
 }
 function updateSeedLinks(){
+    document.getElementById('mode').innerText = mode;
     document.getElementById('level_seed').innerText = level_seed;
     document.getElementById('target_seed').innerText = target_seed;
     document.getElementById('color_seed').innerText = color_seed;
-    document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+['', color_seed, target_seed].join('/');
-    document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, '', target_seed].join('/');
-    document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[level_seed, color_seed, ''].join('/');
+    document.getElementById('mode').href = window.location.href.split('#')[0].split('?')[0]+'?'+['', level_seed, color_seed, target_seed].join('/');
+    document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, '', color_seed, target_seed].join('/');
+    document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, level_seed, '', target_seed].join('/');
+    document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, level_seed, color_seed, ''].join('/');
 }
 
 function ReplaySequence(seq){

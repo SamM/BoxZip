@@ -15,9 +15,11 @@ function reset(){
 
     let search = window.location.search.length>1?window.location.search.slice(1):'';
     search = search.split('/');
-    level_seed = search[0] === undefined ? '' : search[0];
-    color_seed = search[1] === undefined ? '' : search[1];
-    target_seed = search[2] === undefined ? '' : search[2];
+    mode = search[0] === undefined ? '' : search[0];
+    mode = (Object.keys(_modes).indexOf(mode.toLowerCase()) < 0) ? '' : mode.toLowerCase();
+    level_seed = search[0] === undefined ? '' : search[1];
+    color_seed = search[1] === undefined ? '' : search[2];
+    target_seed = search[2] === undefined ? '' : search[3];
     
 
     position = [];
@@ -95,8 +97,8 @@ function update(){
 function start(){
     reset();
     
-    if(!level_seed.length || !target_seed.length || !color_seed.length){
-        JumpToLevel(!level_seed.length?RandomSeed():level_seed,!color_seed.length?RandomSeed():color_seed,!target_seed.length?RandomSeed():target_seed);
+    if(!level_seed.length || !mode.length || !target_seed.length || !color_seed.length){
+        JumpToLevel(!mode.length?RandomMode():mode, !level_seed.length?RandomSeed():level_seed,!color_seed.length?RandomSeed():color_seed,!target_seed.length?RandomSeed():target_seed);
         return;    
     }
 
@@ -111,16 +113,7 @@ function start(){
    ///
    /// Start Level Design
 
-    NUM_WORLDS = 4 + Math.floor(_random.level()*(MAX_WORLDS-3));
-    NUM_GATES = MIN_GATES + Math.floor(_random.level()*(MAX_GATES-MIN_GATES));
-
-    for(var i=0; i<NUM_WORLDS; i++){
-        worlds.push(new World(i));
-    }
-
-    BuildInitialPath();
-    PopulateWorlds(NUM_GATES);
-    PopulateToMin(MIN_GATES);
+   _modes[mode]();
 
     /*/
     /// Generate Colors
@@ -189,3 +182,4 @@ function start(){
 
     if(ANIMATE) update();
 }
+

@@ -9,14 +9,14 @@ const ANIMATE = true;
 
 const DEFAULT_BG_COLOR = "#202020";
 
-const MAX_GATES = 256;
-const MAX_WORLDS = 16;
+let MAX_GATES = 256;
+let MAX_WORLDS = 16;
 
-const MIN_GATES = 2;
+let MIN_GATES = 2;
 
-const MIN_LOCATION = 1;
-const OFFSET_LOCATION = 0;
-const MAX_LOCATION = 3;
+let MIN_LOCATION = 1;
+let OFFSET_LOCATION = 0;
+let MAX_LOCATION = 3;
 
 const DRAW_DEPTH = 10;
 
@@ -42,4 +42,4 @@ const COLOR_LIGHTNESSES = [0.25,0.5,0.75,0.95];
 let path,prev_path,level_seed,target_seed,color_seed,scene,size,position,last_animation,animations_forward,
     animation_i,animation_step,prevPositions,prevWorlds,prevTargets,target_cache,
     cancelHashChange,this_world,target_world,worlds,travel_depth,points,
-    steps,inputSets,lastInput,colors,targets,slides_toggle,_random;
+    steps,inputSets,lastInput,colors,targets,slides_toggle,_random,_modes,mode;
