@@ -23,7 +23,7 @@ let COLOR_SEQ_SUFFIX = [9,7,0];
 
 const DRAW_DEPTH = 10;
                             //512   //1024  //2048  //4096
-const WORLD_IMAGE_SIZE = 256*2      *2      *2      *2;
+const WORLD_IMAGE_SIZE = 256*2      *2 ;//     *2      *2;
 
 const IMAGE_UPDATE_ITERATIONS = 6;
 
