@@ -18,7 +18,8 @@ let MIN_LOCATION = 1;
 let OFFSET_LOCATION = 0;
 let MAX_LOCATION = 3;
 
-let COLOR_SEQ_LEN = 4;
+let COLOR_SEQ_LEN = 3;
+let COLOR_SEQ_SUFFIX = [9,7];
 
 const DRAW_DEPTH = 10;
                             //512   //1024  //2048  //4096

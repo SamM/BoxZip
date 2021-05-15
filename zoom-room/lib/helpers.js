@@ -101,6 +101,7 @@ function RandomColor(alpha){
     function randomize(){
         let seq = BitSequence().D3;
         while(seq.length < COLOR_SEQ_LEN) seq.add(Math.floor(_random.color()*8));
+        seq.add(COLOR_SEQ_SUFFIX);
         return BoxZip3.rgb(seq);
         return BoxZip.ColorFromHSL(_random.color(),COLOR_SATURATION_MIN+_random.color()*(COLOR_SATURATION_MAX-COLOR_SATURATION_MIN),COLOR_LIGHTNESSES[Math.floor(_random.color()*COLOR_LIGHTNESSES.length)],alpha);
     }
