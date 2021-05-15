@@ -4,7 +4,21 @@ function World(i, color){
     this.contents = [];
     this.destinations = [];
 
-    this.add =  function(gate) { this.contents.push(gate); };
+    this.add =  function(gate) {
+        let locations_used = this.contents.map(g=>g.location);
+        function getIntersects(location1){
+            let path1 = Num2Bin(location1, 2);
+            return locations_used.filter((location2)=>{
+                let path2 = Num2Bin(location2, 2);
+                if(Bin2Num(path1) === Bin2Num(path2)) return true;
+                return BoxZip.PathsMatch(path1.length<path2.length?path1:path2, path1.length<path2.length?path2:path1)
+            }).length
+        }
+        let intersects = getIntersects(gate.location);
+        if(intersects === 0){
+            this.contents.push(gate); 
+        }
+    };
     this.drawTo = function(canvas, redraw_worlds, position, offset, step, from_position) {
         step = typeof step == 'number' ? step : 0;
 
@@ -162,10 +176,9 @@ function FixDeadEnds(){
     worlds.forEach(world=>{
         if(world.contents.filter(gate=>gate.world.id !== world.id).length === 0){
             let location = RandomLocation(world);
-            let world2 = RandomWorld(true);
-            while(world2 === world.id) world2 = RandomWorld(true);
-            world2 = world2[world2];
-            if(location !== 0){
+            let world2 = RandomWorld();
+            while(world2.id === world.id) world2 = RandomWorld(true);
+            if(location !== 0 && world2 !== undefined){
                 let gate = new Gate(location, world2);
                 world.add(gate);
             }
