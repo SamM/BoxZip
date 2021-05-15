@@ -47,7 +47,13 @@ function World(i, color){
 
         let ctx = canvas.getContext('2d');
 
+        if(canvas.id === 'scene'){
+            ctx.translate(ds/10/2, ds/10/2);
+            ctx.scale(0.9,0.9);
+        }
         ctx.drawImage(this.canvas, sx*ss,sy*ss,sw*ss,sh*ss, dx*ds, dy*ds, dw*ds, dh*ds);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         let id = this.id;
         if(redraw_worlds){
             let pos = Num2Bin(position,2);
@@ -58,6 +64,7 @@ function World(i, color){
                 gate.world.drawTo(canvas, false, [], Bin2Num(Num2Bin(gate.location).slice(pos.length)));
             });
         }
+        
         
     };
     this.update = function(i){

@@ -61,7 +61,7 @@ function reset(){
 }
 function update(){
     resizeCanvas();
-    clearCanvas(scene);
+    clearWithTargetColor(scene);
 
     if(animations_forward.length > animation_i){
         // Animating
@@ -105,7 +105,8 @@ function start(){
     updateSeedLinks();
 
     scene = document.getElementById('scene');
-
+    scene.draggable = true;
+    
    _random.level = new Math.seedrandom(level_seed);
    _random.color = new Math.seedrandom(color_seed);
    _random.target = new Math.seedrandom(target_seed);
@@ -128,8 +129,8 @@ function start(){
     /// DRAW SLIDES
     // Reprint World Images over and over until recursion has been mapped with enough iterations
     let color = Color(worlds[this_world].color);
-    scene.style.border = color + " "+BORDER_WIDTH+" solid";
-    scene.style.backgroundColor = color;
+    //scene.style.border = color + " "+BORDER_WIDTH+" solid";
+    //scene.style.backgroundColor = color;
 
     let ctx;
     let s = WORLD_IMAGE_SIZE;
@@ -147,6 +148,8 @@ function start(){
         }
     }
 
+    
+    clearWithTargetColor(scene);
     worlds[this_world].drawTo(scene, true);
 
     target_world = -1;

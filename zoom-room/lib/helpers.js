@@ -46,6 +46,15 @@ function backgroundClick(){
     ZoomOut();
 }
 
+function clearWithTargetColor(canvas){
+    let ctx = canvas.getContext('2d');
+    let target = worlds[targets[target_world]];
+    if(target){
+        ctx.fillStyle = Color(target.color).toString();
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
 function helpButtonClick(event){
     event.stopPropagation();
 }
@@ -164,15 +173,15 @@ function nextTarget(){
         }
         target_cache.push(target_world);
     }
-    let color = Color(worlds[targets[target_world]].color);
-    scene.style.border = color + " "+BORDER_WIDTH+" solid";
-    scene.style.backgroundColor = color;
+    //let color = Color(worlds[targets[target_world]].color);
+    //scene.style.border = color + " "+BORDER_WIDTH+" solid";
+    //scene.style.backgroundColor = color;
 }
 
 function prevTarget(){
-    let color = Color(worlds[this_world].color);
-    scene.style.border = color + " "+BORDER_WIDTH+" solid";
-    scene.style.backgroundColor = color;
+    //let color = Color(worlds[this_world].color);
+    //scene.style.border = color + " "+BORDER_WIDTH+" solid";
+    //scene.style.backgroundColor = color;
 }
 function validatePath(path){
     let p = path.split(/[^0123\-]+/i).join('');

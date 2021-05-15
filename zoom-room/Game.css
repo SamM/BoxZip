@@ -36,7 +36,6 @@ body{
     transition: opacity 1s;
     filter: drop-shadow(1vmin 1vmin 2vmin rgba(0,0,0,0.5));
     outline: 0;
-    border-color: #202020;
     position: relative;
     transition: border-color 0.5s, background-color 0.5s;
     transition-timing-function: easeOutCirc();
