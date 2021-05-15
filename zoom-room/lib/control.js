@@ -60,6 +60,7 @@ function UndoStep(skip_animation){
     prevTarget();
     updateOutputs();
     setHash(path);
+    updateSeedLinks();
 }
 
 function ZoomOut(skip_animation){
@@ -95,6 +96,7 @@ function ZoomOut(skip_animation){
     if(travel_depth < 0) travel_depth = 0;
     updateOutputs();
     setHash(path);
+    updateSeedLinks();
     if(!ANIMATE) update();
 }
 
@@ -144,6 +146,7 @@ function ZoomIn(direction, skip_animation){
     travel_depth++;
     updateOutputs();
     setHash(path);
+    updateSeedLinks();
     if(!ANIMATE) update();
 }
 function restart(){

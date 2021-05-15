@@ -7,6 +7,7 @@ function debug(){
         console.log(sent('WORLD',world.id));
         console.log(sent('\tNumber of gates:', world.contents.length));
         console.log(sent('\tGates to self:', world.contents.filter(gate=>gate.world.id===world.id).length))
+        console.log('\tColor:', colors[world.color].index.toArray)
     })
 }
 debug.limits = {};

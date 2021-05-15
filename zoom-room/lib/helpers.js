@@ -7,9 +7,13 @@ function setHash(value){
     window.location.hash = '#' + value;
     cancelHashChange=true;
 }
-function JumpToLevel(mode, level,color,target){
+
+function LevelLink(mode, level,color,target, keephash){
     let search = [mode,level,color,target].join('/');
-    location.href = location.href.split('#')[0].split('?')[0] + (search.length>0 ? '?'+search : '');
+    return location.href.split('#')[0].split('?')[0] + (search.length>0 ? '?'+search : '') + (keephash && location.href.indexOf('#') > -1? '#'+location.href.split('#').slice(1).join('#') : '');
+}
+function JumpToLevel(mode, level,color,target, keephash){
+    location.href = LevelLink(mode, level,color,target, keephash);
 }
 function RandomSeed(){
     let seed = RandomWord(1 + Math.floor(Math.random()*2), Math.random()>0.5);
@@ -43,6 +47,10 @@ function backgroundClick(){
 }
 
 function helpButtonClick(event){
+    event.stopPropagation();
+}
+
+function cancelBGClick(event){
     event.stopPropagation();
 }
 
@@ -91,16 +99,23 @@ function RandomTarget(){
 function RandomColor(alpha){
     if(alpha === undefined) alpha = 1;
     function randomize(){
+        let seq = BitSequence().D3;
+        while(seq.length < COLOR_SEQ_LEN) seq.add(Math.floor(_random.color()*8));
+        return BoxZip3.rgb(seq);
         return BoxZip.ColorFromHSL(_random.color(),COLOR_SATURATION_MIN+_random.color()*(COLOR_SATURATION_MAX-COLOR_SATURATION_MIN),COLOR_LIGHTNESSES[Math.floor(_random.color()*COLOR_LIGHTNESSES.length)],alpha);
     }
     let color = randomize();
     
+    function colorMatch(used){
+        return used.index.matches(color.index.toArray[0]);
+    }
+
     function match(used){
         let diff = color.difference(used);
         return diff <= COLOR_THRESHOLD;
     }
     
-    while(colors.filter(match).length > 0){
+    while(colors.filter(colorMatch).length > 0 ? colors.filter(match).length > 0 : false){
         color = randomize();
     }
 
@@ -184,10 +199,10 @@ function updateSeedLinks(){
     document.getElementById('level_seed').innerText = level_seed;
     document.getElementById('target_seed').innerText = target_seed;
     document.getElementById('color_seed').innerText = color_seed;
-    document.getElementById('mode').href = window.location.href.split('#')[0].split('?')[0]+'?'+[NextMode(), level_seed, color_seed, target_seed].join('/');
-    document.getElementById('level_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, '', color_seed, target_seed].join('/');
-    document.getElementById('color_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, level_seed, '', target_seed].join('/');
-    document.getElementById('target_seed').href = window.location.href.split('#')[0].split('?')[0]+'?'+[mode, level_seed, color_seed, ''].join('/');
+    document.getElementById('mode').href = LevelLink(NextMode(), level_seed, color_seed, target_seed);
+    document.getElementById('level_seed').href = LevelLink(mode, '', color_seed, target_seed)
+    document.getElementById('color_seed').href = LevelLink(mode, level_seed, '', target_seed, true)
+    document.getElementById('target_seed').href = LevelLink(mode, level_seed, color_seed, '')
 }
 
 function ReplaySequence(seq){

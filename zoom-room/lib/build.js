@@ -158,6 +158,21 @@ function PopulateToMin(min){
     
 }
 
+function FixDeadEnds(){
+    worlds.forEach(world=>{
+        if(world.contents.filter(gate=>gate.world.id !== world.id).length === 0){
+            let location = RandomLocation(world);
+            let world2 = RandomWorld(true);
+            while(world2 === world.id) world2 = RandomWorld(true);
+            world2 = world2[world2];
+            if(location !== 0){
+                let gate = new Gate(location, world2);
+                world.add(gate);
+            }
+        }
+    })
+}
+
 function RandomLocation(world){
     let locations_used = Array.isArray(world) ? world : typeof world == 'object' && Array.isArray(world.contents) ? world.contents.map(gate=>gate.location) : [];
     function randomize(){
@@ -176,7 +191,7 @@ function RandomLocation(world){
     }
     let location = randomize();
 
-    console.log(locations_used);
+    //console.log(locations_used);
     function getIntersects(location1){
         let path1 = Num2Bin(location1, 2);
         return locations_used.filter((location2)=>{
@@ -216,6 +231,7 @@ _modes.easy = function(){
     BuildInitialPath();
     PopulateWorlds(NUM_GATES);
     PopulateToMin(MIN_GATES);
+    FixDeadEnds();
 }
 _modes.medium = function(){
     MAX_WORLDS = 7;
@@ -234,6 +250,7 @@ _modes.medium = function(){
     BuildInitialPath();
     PopulateWorlds(NUM_GATES);
     PopulateToMin(MIN_GATES);
+    FixDeadEnds();
 }
 _modes.fractal = function(){
     MAX_WORLDS = 7;
@@ -252,6 +269,7 @@ _modes.fractal = function(){
     MirrorWorlds(2);
     BuildInitialPath();
     PopulateWorlds(NUM_GATES);
+    FixDeadEnds();
 }
 _modes.hard = function(){
     MAX_WORLDS = 7;
@@ -270,6 +288,7 @@ _modes.hard = function(){
     BuildInitialPath();
     PopulateWorlds(NUM_GATES);
     PopulateToMin(MIN_GATES);
+    FixDeadEnds();
 }
 _modes.spicy = function(){
     MAX_WORLDS = 8 +Math.pow(2, Math.floor(_random.level()*4));
@@ -288,5 +307,6 @@ _modes.spicy = function(){
     BuildInitialPath();
     PopulateToMin(MIN_GATES);
     PopulateWorlds(NUM_GATES);
+    FixDeadEnds();
 }
 _mode_order = ['easy', 'medium', 'hard', 'spicy', 'fractal']

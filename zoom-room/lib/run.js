@@ -98,7 +98,7 @@ function start(){
     reset();
     
     if(!level_seed.length || !mode.length || !target_seed.length || !color_seed.length){
-        JumpToLevel(!mode.length?RandomMode():mode, !level_seed.length?RandomSeed():level_seed,!color_seed.length?RandomSeed():color_seed,!target_seed.length?RandomSeed():target_seed);
+        JumpToLevel(!mode.length?RandomMode():mode, !level_seed.length?RandomSeed():level_seed,!color_seed.length?RandomSeed():color_seed,!target_seed.length?RandomSeed():target_seed, true);
         return;    
     }
 
@@ -173,6 +173,11 @@ function start(){
     document.getElementById('slides_modal').addEventListener('click', closeSlidesButtonClick);
     document.getElementById('close_slides').addEventListener('click', closeSlidesButtonClick);
     document.getElementById('logo').addEventListener('click', closeSlidesButtonClick);
+
+    document.getElementById('mode').addEventListener('click', cancelBGClick);
+    document.getElementById('level_seed').addEventListener('click', cancelBGClick);
+    document.getElementById('color_seed').addEventListener('click', cancelBGClick);
+    document.getElementById('target_seed').addEventListener('click', cancelBGClick);
     
     resizeCanvas();
 
